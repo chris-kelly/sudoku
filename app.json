@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "sudokuApp",
-    "slug": "sudokuApp",
-    "version": "1.0.0",
+    "name": "supremeSudokuApp",
+    "slug": "supremeSudokuApp",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -23,10 +23,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.ccrkelly.superemeSudokuApp",
+      "versionCode": 3,
+      "permissions": []
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "description": "",
+    "facebookAppId": "1069079036911787",
+    "facebookDisplayName": "supremesudoku"
   }
 }
