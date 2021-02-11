@@ -22,10 +22,6 @@ import {
   eliminatePotentialNumbersInSameConstraint,removeMistakeResult,removeMistakePotential
 } from './src/utils/hintHelperFunctions'
 
-// AN SDK
-import * as FacebookAds from 'expo-ads-facebook';
-// FacebookAds.AdSettings.addTestDevice(FacebookAds.AdSettings.currentDeviceHash);
-
 /*
  * Render pre/user-filled cells in the sudoku board.
  */
@@ -639,12 +635,6 @@ export class Game extends React.Component {
           p2Click = {() => this.handlePotentialGrid()}
         />
         <View style={[{height: 10}]}></View>
-        {/* <FacebookAds.BannerAd
-          placementId="1069079036911787_1070427113443646"
-          type="standard"
-          onPress={() => console.log('click')}
-          onError={error => console.log('error', error)}
-        /> */}
       </View>
     )
   }
@@ -781,9 +771,6 @@ export class newGameDifficulty extends React.Component {
       console.log('Light mode')
     }
     if(!Resume) {
-      FacebookAds.InterstitialAdManager.showAd("1069079036911787_1069154523570905")
-      .then(didClick => {})
-      .catch(error => {});
       var seed = generateNewSudokuFromSeed(sudokuSets[difficulty],constraints);
       storeData(seed); // save progress
       this.setState({continueButton: true})
