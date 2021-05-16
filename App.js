@@ -56,8 +56,10 @@ export class PotentialCell extends React.Component {
   PotentialValue(value) {
     return (
       <View style={styles.potentialCell}>
-        <Text style={[styles.potentialText]}>{value != 0 ? value : null}</Text>
+        <Text style={[styles.potentialText,{color: this.props.textColor}]}>{value != 0 ? value : null}</Text>
       </View>
+      
+
     )
   }
   /**
@@ -115,6 +117,7 @@ const RenderCell = (props) => {
       <PotentialCell
         value = {props.value}
         onClick = {props.onClick}
+        textColor = {props.potentialtextColor}
         backgroundColor = {props.backgroundColor}
         borderColor = {props.borderColor}
         i = {props.i}
@@ -146,11 +149,12 @@ export class SudokuBoard extends React.Component {
         j = {j}
         onClick = {() => this.props.onClick(i,j)}
         textColor = {
-          element.length !== undefined && this.props.editPotentialToggle ? colours['userFilledTextPotential'] : 
+          element.length !== undefined && this.props.editPotentialToggle ? colours['userFilledTextPotential'] :
           element.length !== undefined ? colours['userFilledText'] :
           this.props.editPotentialToggle ? colours['preFilledTextPotential'] : 
           colours['preFilledText']
-        } 
+        }
+        potentialtextColor = {colours['potentialTextColor']}
         backgroundColor = {
           JSON.stringify(this.props.selectedCell) === JSON.stringify([i,j]) ? (this.props.editPotentialToggle ? this.props.colours['selectedNumberPotential'] : colours['selectedNumber']) : // selected cell
           isItemInArray(this.props.hintCellsChanged.map(x => [x[0],x[1]]),[i,j]).length > 0 ? (this.props.hintType === 'mistake' ? colours['mistakeCell'] : colours['opportunityHighlight']) : // highlight wrong cell as red
@@ -357,10 +361,10 @@ export class Game extends React.Component {
         if(s_dict['sudoku'].subset(index(i,j,0)) != k) {
           s_dict['sudoku'] = s_dict['sudoku'].subset(index(i,j,0),k) // set result cell to k
         } else {
-          var indicies_to_repopulate = constraints.map(x => isItemInArray(x,[i,j]).length > 0 ? x : []).flat() // need to refill potential numbers in relevant constraints
-          indicies_to_repopulate.map(x => s_dict['sudoku'].subset(index(x[0],x[1],gRange(1,9)),gRange(1,9)))
           s_dict['sudoku'] = s_dict['sudoku'].subset(index(i,j,0),0) // set result cell to 0
         }
+        var indicies_to_repopulate = constraints.map(x => isItemInArray(x,[i,j]).length > 0 ? x : []).flat() // need to refill potential numbers in relevant constraints
+          indicies_to_repopulate.map(x => s_dict['sudoku'].subset(index(x[0],x[1],gRange(1,9)),gRange(1,9)))
         this.setState({sudoku: cleanup(s_dict,constraints)})
         var seed = {preFilled: this.state.preFilled, winner: this.state.winner, sudoku: cleanup(s_dict,constraints)};  
     } else if( // Edit potential cell
@@ -649,7 +653,7 @@ export class HomeScreen extends React.Component {
     let { continueButton } = this.props.route.params;
     this.state = {
       seed: null,
-      darkModeToggle: false,
+      darkModeToggle: true,
       continueButton: continueButton,
     }
   }

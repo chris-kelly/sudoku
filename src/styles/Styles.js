@@ -45,40 +45,53 @@ const styles = StyleSheet.create({
   },
   potentialText: {
     fontSize: 10,
-    textAlign: 'center',
-    color: 'gray'
+    textAlign: 'center'//,
+    // color: 'gray'
   },
 })
 
 const lightMode = {
-  cellBackground: '#FFFFFF',
-  selectedNumber: '#DFE3EE',
-  mistakeCell: '#ff6666',
-  opportunityHighlight: '#FF9F45',
-  opportunityConstraintHighlight: '#FFE1C5',
-  floodlight: "#DCDCDC",
-  preFilledText: "#263962",
-  userFilledText: "#8B9DC3", 
-  borderColor: "#3B5998",
-  backgroundColor: '#F7F7F7', 
-  selectedNumberPotential: '#C6D6CB',
-  borderColorPotential: "#2D3C2D",
-  preFilledTextPotential: "#2D3C2D",
-  userFilledTextPotential: "#8D9F8D"
+  // constant styles
+  backgroundColor: '#F7F7F7', // colour of background (colour outside of sudoku board)
+  cellBackground: '#FFFFFF', // non-selected cell background
+  potentialTextColor: "#808080", // colour of potential numbers (static)
+  mistakeCell: '#ff6666', // colour to make mistake cell
+  opportunityHighlight: '#FF9F45', // colour of hint cell
+  opportunityConstraintHighlight: '#FFE1C5', // colour of cells in same relevant constraint as hint cell 
+  floodlight: "#DCDCDC", // what colours to make non-valid cells when using floodlight
+  // normal mode styles
+  selectedNumber: '#DFE3EE', // selected cell colour
+  preFilledText: "#263962", // pre-filled text colour
+  userFilledText: "#8B9DC3",  // user-filled text colour
+  borderColor: "#3B5998", // colour of cell border
+  // potential mode stypes
+  selectedNumberPotential: '#C6D6CB', // selected cell colour
+  preFilledTextPotential: "#2D3C2D", // pre-filled text colour
+  userFilledTextPotential: "#8D9F8D", // user-filled text colour
+  borderColorPotential: "#2D3C2D" // colour of cell border
 }
 
 const darkMode = {
-  cellBackground: '#221A10',
-  selectedNumber: '#474542',
-  mistakeCell: '#990000',
-  opportunityHighlight: '#DB6D00',
-  opportunityConstraintHighlight: '#AF5700',
-  floodlight: "#474542",
-  preFilledText: "#FFC772",
-  userFilledText: "#DC8909",
-  borderColor: "#FFC772",
-  backgroundColor: '#362819', 
+  // constant styles
+  backgroundColor: '#000000', // colour of background (colour outside of sudoku board)
+  cellBackground: '#221A10', // non-selected cell background
+  potentialTextColor: "#AEACAC", // colour of potential numbers (static)
+  mistakeCell: '#990000', // colour to make mistake cell
+  opportunityHighlight: '#DB6D00', // colour of hint cell
+  opportunityConstraintHighlight: '#AF5700', // colour of cells in same relevant constraint as hint cell 
+  floodlight: "#474542", // what colours to make non-valid cells when using floodlight
+  // normal mode styles
+  selectedNumber: '#5E4111', // selected cell colour
+  preFilledText: "#DC8909", // pre-filled text colour
+  userFilledText: "#FFC772",  // user-filled text colour
+  borderColor: "#E3A951", // colour of cell border
+  // potential mode stypes
+  selectedNumberPotential: '#165E16', // selected cell colour
+  preFilledTextPotential: "#59B459", // pre-filled text colour
+  userFilledTextPotential: "#91EA91", // user-filled text colour
+  borderColorPotential: "#61CE61" // colour of cell border
 }
+
 export {
     styles as styles,
     lightMode as lightMode,

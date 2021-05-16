@@ -1,7 +1,7 @@
 // FUNCTIONS TO HELP WITH SUDOKU SOLVER
 
 import { matrix,reshape,index,flatten } from 'mathjs'
-import { gRange } from './mathHelperFunctions'
+import { gRange,generate_n_choose_k_combination } from './mathHelperFunctions'
 
 /**
  * When a result cell is populated, replace all numbers from the potential array for the same cell with zero
@@ -230,29 +230,7 @@ var eliminatePotentialNumbersInSameConstraint = function(s_dict,constraints,comp
         let col_indicies = vector_list.map(cs => cs.filter(col => col != 0).length > 0).flatMap((bool, index) => bool ? index : []) 
         // Get n choose k combinations of columns (where order matters)
         if(col_indicies.length >= comparisons) {
-            if(comparisons === 2) {
-                var combn_element_indicies = col_indicies.flatMap((v, i) => // for every pair of col indicies 
-                    col_indicies.slice(i+1).map(w => v < w ? [v,w] : []) // concatenate col index pairs (as long as the second index pair is greater than prior index pair - so ordering matters)
-                    ).filter(x => x.length > 0)
-            } else if(comparisons === 3) {
-                var combn_element_indicies = col_indicies.flatMap((v, i) => 
-                    col_indicies.slice(i+1).flatMap(w => 
-                        col_indicies.slice(i+2).map(x => v < w && w < x ? [v,w,x] : [])
-                    )).filter(x => x.length > 0)
-            } else if(comparisons === 4) {
-                var combn_element_indicies = col_indicies.flatMap((v, i) => 
-                    col_indicies.slice(i+1).flatMap(w => 
-                        col_indicies.slice(i+2).flatMap(x => 
-                            col_indicies.slice(i+3).map(y => v < w && w < x && x < y ? [v,w,x,y] : [])
-                    ))).filter(x => x.length > 0)
-            } else if(comparisons === 5) {
-                var combn_element_indicies = col_indicies.flatMap((v, i) => 
-                    col_indicies.slice(i+1).flatMap(w => 
-                        col_indicies.slice(i+2).flatMap(x =>
-                            col_indicies.slice(i+3).flatMap(y => 
-                                col_indicies.slice(i+4).map(z => v < w && w < x && x < y && y < z ? [v,w,x,y,z] : [])
-                    )))).filter(x => x.length > 0)
-            }
+            var combn_element_indicies = generate_n_choose_k_combination(col_indicies,comparisons)
             // get unique length of potential numbers in each of the combinations of columns
             let unique_num_combinations = combn_element_indicies.map(combn =>
                 vector_list.filter((v,i) => combn.includes(i)).flat().filter((v,i,arr) => v != 0 && arr.indexOf(v) === i).length
@@ -267,6 +245,8 @@ var eliminatePotentialNumbersInSameConstraint = function(s_dict,constraints,comp
                 ) {
                 change = true
                 let all_could_remove_from = col_indicies.flatMap(x => elements_with_option.includes(x) ? [] : x).map(y => cs[y]).filter(x => candidate_elements.some(y => s_matrix._data[x[0]][x[1]].includes(y)))
+                // let num = all_could_remove_from.map(i => reshape(s_matrix.subset(index(i[0],i[1],gRange(1,9))),[9])._data.filter(x => x != 0))
+                // console.log(num)
                 relevantConstraints.push(col_indicies.flatMap(x => elements_with_option.includes(x) ? x : []).map(i => cs[i]))
                 let cell_ref_to_update = all_could_remove_from.map(x => candidate_elements.map(y => x.concat(y))).flat()
                 cellsChanged.push(cell_ref_to_update)
@@ -275,7 +255,15 @@ var eliminatePotentialNumbersInSameConstraint = function(s_dict,constraints,comp
                 solveText.push('The potential numbers ' + candidate_elements + ' can be removed from the dark orange boxes, because they have to in the light orange boxes!')
             }
         }
-    }
+    }    
+    // console.log(logging)
+    // console.log(cellsChanged[0])
+    // let a = JSON.parse(JSON.stringify(s_dict['sudoku']._data))
+    // let a = cellsChanged[0].map(x => s_dict['sudoku'].subset(index(x[0],x[1],gRange(0,9)))._data)
+    // a = matrix(a)
+    // console.log(a)
+    // cellsChanged[0].map(x => a.subset(index(x[0],x[1],x[2]),0))
+    // console.log(a)
     if(!hint && change) {
         // cellsChanged[0].map((x,i) => s_dict['sudoku'].subset(index(x[0],x[1],gRange(1,9)),newValues[0][i]))
         cellsChanged[0].map(x => s_dict['sudoku'].subset(index(x[0],x[1],x[2]),0))

@@ -1,6 +1,7 @@
 // FUNCTIONS TO HELP WITH MATHS
 
 import { range, floor, random } from 'mathjs'
+// const mathjs = require('mathjs'); const floor = mathjs.floor; const random = mathjs.random; const subset = mathjs.subset; const index = mathjs.index
 
 /**
  * Returns index where item is found in an array.
@@ -44,8 +45,56 @@ const shuffleArray = function(array) {
     return(array)
 }
 
+/**
+ * Generate all unordered combinations of an array
+ * @param {object} array - Array to generate all combinations from
+ */
+const recursive_combinations = function(array) {
+    var permArr = []
+    for(let i = 0; i < array.length; i++) {
+        var nArray = [...array] // make a copy (as splice changes nArray inplace, if not it would screw up array.length in for loop)
+        var constant_bit = nArray.splice(i,1) // note now nArray has had constant_bit removed at index i (inplace)
+        if(nArray.length >= 3) {
+            permArr.push(recursive_combinations(nArray).map(v => constant_bit.concat(v))) // recursive
+        } else {
+            permArr.push(constant_bit.concat(nArray)) // normal order
+            permArr.push(constant_bit.concat(nArray.reverse())) // reverse order      
+        }
+    }
+    if(nArray.length >= 3) {
+        permArr = permArr.flat() // otherwise nested, change before being fed to higher level recursion
+    }
+    return(permArr)
+}
+
+/**
+ * Generate n choose k ordered combinations from an array
+ * @param {object} x - Aray to generate combinations from
+ * @param {object} k - Number of items to select from
+ */
+const generate_n_choose_k_combination = function(x,k) {
+    var permArr = []
+    for(let i = 0; i < x.length; i++) {
+      var remainder = [...x] // make a copy (as splice changes x inplace, if not it would screw up x.length in for loop)
+      var constant_bit = remainder.splice(i,1) // note remainder has had constant_bit removed at index i (inplace)
+      remainder = remainder.filter(v => v > constant_bit) // filter for ordering
+      if(k == 2) {
+        for(var v of remainder) {
+          permArr.push(constant_bit.concat(v))
+        }
+      } else {
+        if(remainder.length >= k-1) {
+            generate_n_choose_k_combination(remainder,k-1).map(v2 => permArr.push(constant_bit.concat(v2))) // recursive
+        }
+      }
+    }
+    return(permArr)
+}
+
 export {
     isItemInArray as isItemInArray,
     gRange as gRange,
     shuffleArray as shuffleArray,
+    recursive_combinations as recursive_combinations,
+    generate_n_choose_k_combination as generate_n_choose_k_combination,
 }
