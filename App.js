@@ -15,7 +15,7 @@ import {styles,lightMode,darkMode} from './src/styles/Styles.js'
 import {generateNewSudokuFromSeed,sudokuSets,constraints,setupSudoku} from './src/utils/generateNewSudoku'
 import {megaSudokuInput,checkIndexDivisibleThree} from './src/utils/renderHelperFunctions'
 import {isItemInArray,gRange,shuffleArray} from './src/utils/mathHelperFunctions'
-import {storeData,getData} from './src/utils/saveProgress'
+import {storeData,getData,removeData} from './src/utils/saveProgress'
 import {
   removePotentialNumbersWhenResultCellPoplulated,removePotentialNumbersFromSameResultConstraint,
   cleanup,populateResultCellIfOnlyOnePotentialNumber,populateResultCellIfOnlyPotentialNumberInSameConstraint,
@@ -311,10 +311,12 @@ export class HintSelector extends React.Component {
 export class Game extends React.Component {
   constructor(props) {
     super(props);
-    let { seedWinner } = this.props.route.params;
-    let { seedPreFilled } = this.props.route.params;
-    let { seedSudoku } = this.props.route.params;
-    let { colours } = this.props.route.params;
+    let { 
+      seedWinner, seedPreFilled, seedSudoku, colours, 
+      hint1Counter, hint2Counter, solveCounter, mistakeCounter,
+      hintCellsChanged, hintNewValues, hintRelevantConstraints, hintType,
+      h1Toggle, h2Toggle,
+    } = this.props.route.params;
     this.state = {
       constraints: constraints,  
       sudoku: seedSudoku, // cleanup(setup_sudoku(preFilled),constraints,0), // 
@@ -323,21 +325,21 @@ export class Game extends React.Component {
       showPotentialToggle: false,
       editPotentialToggle: false,
       flashlightToggle: false,
-      h1Toggle: false,
-      h2Toggle: false,
+      h1Toggle: h1Toggle,
+      h2Toggle: h2Toggle,
       selectedCell: [null,null],
       selectedValue: 0,
-      hintCellsChanged: [],
-      hintNewValues: [],
-      hintRelevantConstraints: [],
-      hintType: false,
+      hintCellsChanged: hintCellsChanged,
+      hintNewValues: hintNewValues,
+      hintRelevantConstraints: hintRelevantConstraints,
+      hintType: hintType,
       cleanup: false,              
       winner: reshape(seedWinner,[9,9]), 
       flashlightCounter: 0,
-      hint1Counter: 0,
-      hint2Counter: 0,
-      solveCounter: 0,
-      mistakeCounter: 0,
+      hint1Counter: hint1Counter,
+      hint2Counter: hint2Counter,
+      solveCounter: solveCounter,
+      mistakeCounter: mistakeCounter,
       colours: colours,
       time: 0
      }
@@ -369,7 +371,12 @@ export class Game extends React.Component {
         var indicies_to_repopulate = constraints.map(x => isItemInArray(x,[i,j]).length > 0 ? x : []).flat() // need to refill potential numbers in relevant constraints
           indicies_to_repopulate.map(x => s_dict['sudoku'].subset(index(x[0],x[1],gRange(1,9)),gRange(1,9)))
         this.setState({sudoku: cleanup(s_dict,constraints)})
-        var seed = {preFilled: this.state.preFilled, winner: this.state.winner, sudoku: cleanup(s_dict,constraints)};  
+        var seed = {
+          preFilled: this.state.preFilled, winner: this.state.winner, sudoku: cleanup(s_dict,constraints), 
+          hint1Counter: this.state.hint1Counter, hint2Counter: this.state.hint2Counter, solveCounter: this.state.solveCounter, mistakeCounter: this.state.mistakeCounter,
+          hintCellsChanged: this.state.hintCellsChanged, hintNewValues: this.state.hintNewValues, hintRelevantConstraints: this.state.hintRelevantConstraints, hintType: this.state.hintType,
+          h1Toggle: this.state.h1Toggle, h2Toggle: this.state.h2Toggle
+        };
     } else if( // Edit potential cell
       i != null 
       && k != 0
@@ -382,7 +389,12 @@ export class Game extends React.Component {
           s_dict['sudoku'].subset(index(i,j,k),0) // remove k from potential cell
         }
         this.setState({sudoku: s_dict})
-        var seed = {preFilled: this.state.preFilled, winner: this.state.winner, sudoku: s_dict};
+        var seed = {
+          preFilled: this.state.preFilled, winner: this.state.winner, sudoku: s_dict,
+          hint1Counter: this.state.hint1Counter, hint2Counter: this.state.hint2Counter, solveCounter: this.state.solveCounter, mistakeCounter: this.state.mistakeCounter,
+          hintCellsChanged: this.state.hintCellsChanged, hintNewValues: this.state.hintNewValues, hintRelevantConstraints: this.state.hintRelevantConstraints, hintType: this.state.hintType,
+          h1Toggle: this.state.h1Toggle, h2Toggle: this.state.h2Toggle
+        };
       }
       this.setState({
         selectedCell: [i,j],
@@ -467,7 +479,9 @@ export class Game extends React.Component {
     }
     while (true) {
       var nextMove = removeMistakeResult(this.state.sudoku,this.state.winner,constraints,!solve)
-      if(nextMove['change']) {this.setState({mistakeCounter: this.state.mistakeCounter + 1}); break};
+      if(nextMove['change']) {
+        if(!hint2) {this.setState({mistakeCounter: this.state.mistakeCounter + 1})} break
+      };
       var nextMove = removeMistakePotential(this.state.sudoku,this.state.winner,constraints,!solve)
       if(nextMove['change']) {this.setState({showPotentialToggle: true}); this.setState({mistakeCounter: this.state.mistakeCounter + 1}); break};
       var nextMove = populateResultCellIfOnlyOnePotentialNumber(this.state.sudoku,constraints,!solve)
@@ -485,11 +499,19 @@ export class Game extends React.Component {
     }
     this.setState({
       hintCellsChanged: solve ? [] : nextMove['cellsChanged'],
-      hintNewValues: solve ? [] :nextMove['newValues'],
-      hintRelevantConstraints: solve ? [] :nextMove['relevantConstraints'],
-      hintType: solve ? [] :nextMove['type'],
+      hintNewValues: solve ? [] : nextMove['newValues'],
+      hintRelevantConstraints: solve ? [] : nextMove['relevantConstraints'],
+      hintType: solve ? [] : nextMove['type'],
       selectedCell: [null,null]
     })
+    let seed = {
+      preFilled: this.state.preFilled, winner: this.state.winner, sudoku: cleanup(this.state.sudoku,constraints),
+      hint1Counter: this.state.hint1Counter, hint2Counter: this.state.hint2Counter, solveCounter: this.state.solveCounter, mistakeCounter: this.state.mistakeCounter,
+      hintCellsChanged: solve ? [] : nextMove['cellsChanged'], hintNewValues: solve ? [] : nextMove['newValues'], 
+      hintRelevantConstraints: solve ? [] : nextMove['relevantConstraints'], hintType: solve ? [] : nextMove['type'],
+      h1Toggle: solve ? false : true, h2Toggle: hint2 ? true: false
+    }; 
+    storeData(seed); // store progress
     if(solve) {
       if (Platform.OS === 'web') {
         alert(nextMove['solveText'])
@@ -500,8 +522,6 @@ export class Game extends React.Component {
           {cancelable: false}
         );
       }
-      let seed = {preFilled: this.state.preFilled, winner: this.state.winner, sudoku: cleanup(this.state.sudoku,constraints)}; 
-      storeData(seed); // store progress
     } else if(hint2) {
       if (Platform.OS === 'web') {
         alert(nextMove['hintText'])
@@ -550,7 +570,12 @@ export class Game extends React.Component {
     if(JSON.stringify(winner) === 
        JSON.stringify(reshape(sudoku['sudoku'].subset(index(gRange(9),gRange(9),0)),[9,9])._data)) {
          console.log('Winner!');
-         this.props.navigation.navigate('Winner');
+         this.props.navigation.navigate('Winner',{ 
+          hint1Counter: this.state.hint1Counter,
+          hint2Counter: this.state.hint2Counter,
+          solveCounter: this.state.solveCounter,
+          mistakeCounter: this.state.mistakeCounter,
+        });
        }
   }
 
@@ -570,9 +595,10 @@ export class Game extends React.Component {
     // // storeData(seed); // store progress
     // this.checkWinner(seedWinner,seedSudoku);
     this.checkWinner(this.state.winner,this.state.sudoku);
-    console.log(this.state.solveCounter)
-    console.log(this.state.hint1Counter)
-    console.log(this.state.hint2Counter)
+    // console.log(this.state.solveCounter)
+    // console.log(this.state.hint1Counter)
+    // console.log(this.state.hint2Counter)
+    // console.log(this.state.mistakeCounter)
     // console.log(console.time)
     return(
       <View style={[styles.container,{backgroundColor: this.state.colours['backgroundColor']}]}>
@@ -654,7 +680,7 @@ export class HomeScreen extends React.Component {
           }
         } else {
           Alert.alert(
-            "Warning!", "This will erase your existing game, do you want to continue?",
+            "Warning!","This will erase your existing game, do you want to continue?",
             [{text: "OK", onPress: () => {
               this.setState({continueButton: false});
               this.props.navigation.navigate('Difficulty')
@@ -676,6 +702,16 @@ export class HomeScreen extends React.Component {
           seedSudoku: seed['sudoku'],
           seedStart: seed['time'],
           colours: colours,
+          hint1Counter: seed['hint1Counter'],
+          hint2Counter: seed['hint2Counter'],
+          solveCounter: seed['solveCounter'],
+          mistakeCounter: seed['mistakeCounter'],
+          hintCellsChanged: seed['hintCellsChanged'], 
+          hintNewValues: seed['hintNewValues'], 
+          hintRelevantConstraints: seed['hintRelevantConstraints'], 
+          hintType: seed['hintType'],
+          h1Toggle: seed['h1Toggle'],
+          h2Toggle: seed['h2Toggle'],
         })
       })
     }
@@ -745,7 +781,7 @@ export class newGameDifficulty extends React.Component {
       continueButton: null,
     }
   }
-  generateGame(Resume=false,difficulty) {  
+  generateGame(difficulty) {  
     if(this.state.darkModeToggle) {
       var colours = darkMode
       console.log('Dark mode')
@@ -753,28 +789,25 @@ export class newGameDifficulty extends React.Component {
       var colours = lightMode
       console.log('Light mode')
     }
-    if(!Resume) {
-      var seed = generateNewSudokuFromSeed(sudokuSets[difficulty],constraints);
-      storeData(seed); // save progress
-      this.setState({continueButton: true})
-      this.props.navigation.navigate('Sudoku', { 
-        seedWinner: seed['winner'], 
-        seedPreFilled: seed['preFilled'],
-        seedSudoku: seed['sudoku'],
-        colours: colours,
+    var seed = generateNewSudokuFromSeed(sudokuSets[difficulty],constraints);
+    storeData(seed); // save progress
+    this.setState({continueButton: true})
+    this.props.navigation.navigate('Sudoku', { 
+      seedWinner: seed['winner'], 
+      seedPreFilled: seed['preFilled'],
+      seedSudoku: seed['sudoku'],
+      colours: colours,
+      hint1Counter: 0,
+      hint2Counter: 0,
+      solveCounter: 0,
+      mistakeCounter: 0,
+      hintCellsChanged: [],
+      hintNewValues: [],
+      hintRelevantConstraints: [],
+      hintType: false,
+      h1Toggle: false,
+      h2Toggle: false,
       })
-    } else {
-      getData().then((value) => { // wait to navigate until game has loaded
-        let seed = value;
-        seed['sudoku']['sudoku'] = matrix(seed['sudoku']['sudoku'].data) // mathjs matrix doesn't read/save correctly
-        this.props.navigation.navigate('Sudoku', { 
-          seedWinner: seed['winner'], 
-          seedPreFilled: seed['preFilled'],
-          seedSudoku: seed['sudoku'],
-          colours: colours,
-        })
-      })
-    }
   }
   render() { 
     return (
@@ -785,21 +818,21 @@ export class newGameDifficulty extends React.Component {
           >
           <View style = {{width: 200, paddingLeft: 50, paddingTop: 170}}>
             <TouchableOpacity
-              onPress = {() => {this.generateGame(false,'Easy')}}
+              onPress = {() => {this.generateGame('Easy')}}
               style = {{backgroundColor: '#263962', height: 50, width: 150, justifyContent: "center", alignItems: "center"}}
               >
               <Text style={{color: '#FFFFFF', fontSize: 20}}>Easy</Text> 
             </TouchableOpacity>
             <View style = {{height: 15}}></View>
             <TouchableOpacity
-              onPress = {() => {this.generateGame(false,'Medium')}}
+              onPress = {() => {this.generateGame('Medium')}}
               style = {{backgroundColor: '#263962', height: 50, width: 150, justifyContent: "center", alignItems: "center"}}
               >
               <Text style={{color: '#FFFFFF', fontSize: 20}}>Medium</Text> 
             </TouchableOpacity>
             <View style = {{height: 15}}></View>
             <TouchableOpacity
-              onPress = {() => {this.generateGame(false,'Hard')}}
+              onPress = {() => {this.generateGame('Hard')}}
               style = {{backgroundColor: '#263962', height: 50, width: 150, justifyContent: "center", alignItems: "center"}}
               >
               <Text style={{color: '#FFFFFF',  fontSize: 20}}>Hard</Text> 
@@ -812,31 +845,44 @@ export class newGameDifficulty extends React.Component {
   }
 };
 
-/** Winner screen */
+/** 
+ * Winner screen 
+ */
 export class winnerScreen extends React.Component {
   continue() {
     if (Platform.OS === 'web') {
       let c = confirm('Well done! Play again?')
       if(c) {
-        this.props.navigation.navigate('Home',{continueButton: false})
+        removeData().then((value) => { 
+          this.props.navigation.navigate('Home',{continueButton: false})
+        })
       }
     } else {
-      this.props.navigation.navigate('Home',{continueButton: false})
+      removeData().then((value) => { 
+        this.props.navigation.navigate('Home',{continueButton: false})
+      }) 
     }
   }
   render() { 
+    let { hint1Counter, hint2Counter, solveCounter, mistakeCounter } = this.props.route.params;
+    console.log(hint1Counter)
     return (
       <View style = {{flex: 1, justifyContent: "center", alignItems: "center", marginTop: 22}}>
         <ImageBackground
           style={{height:400, width: 400, alignItems: "center"}}
           source={require('./src/img/winner.jpg')}
           >
-          <View style = {{width: 150, paddingLeft: 0, paddingTop: 300}}>
-            <TouchableOpacity onPress = {() => {this.continue()}}
-                style = {{backgroundColor: '#263962', height: 50, width: 150, justifyContent: "center", alignItems: "center"}}
-              >
-                <Text style={{color: '#FFFFFF', fontSize: 20}}>Continue</Text> 
-              </TouchableOpacity>
+          <View style = {{width: 450, paddingLeft: 0, paddingTop: 300, alignItems: "center"}}>
+            <Text>Total mistakes made: {mistakeCounter}</Text>
+            <Text>Total hints: {hint1Counter + hint2Counter}</Text>
+            <Text>Total cells filled by CPU: {solveCounter}</Text>
+            <View style = {{width: 150, paddingTop: 20}}>
+              <TouchableOpacity onPress = {() => {this.continue()}}
+                  style = {{backgroundColor: '#263962', height: 50, width: 150, justifyContent: "center", alignItems: "center"}}
+                >
+                  <Text style={{color: '#FFFFFF', fontSize: 20}}>Continue</Text> 
+                  </TouchableOpacity>
+            </View>
           </View>
         </ImageBackground>
       </View>
