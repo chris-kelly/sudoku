@@ -334,7 +334,10 @@ export class Game extends React.Component {
       cleanup: false,              
       winner: reshape(seedWinner,[9,9]), 
       flashlightCounter: 0,
-      hintCounter: 0,
+      hint1Counter: 0,
+      hint2Counter: 0,
+      solveCounter: 0,
+      mistakeCounter: 0,
       colours: colours,
       time: 0
      }
@@ -455,35 +458,51 @@ export class Game extends React.Component {
   };  
 
   generateHints(hint2=false,solve=false) {
-    this.setState({
-      hintCounter: this.state.hintCounter + 1
-    })
+    if(solve == true) {
+      this.setState({solveCounter: this.state.solveCounter + 1})
+    } else if(hint2 == true) {
+      this.setState({hint2Counter: this.state.hint2Counter + 1})
+    } else {
+      this.setState({hint1Counter: this.state.hint1Counter + 1})
+    }
     while (true) {
-      var nextMove = removeMistakeResult(this.state.sudoku,this.state.winner,constraints,true)
+      var nextMove = removeMistakeResult(this.state.sudoku,this.state.winner,constraints,!solve)
+      if(nextMove['change']) {this.setState({mistakeCounter: this.state.mistakeCounter + 1}); break};
+      var nextMove = removeMistakePotential(this.state.sudoku,this.state.winner,constraints,!solve)
+      if(nextMove['change']) {this.setState({showPotentialToggle: true}); this.setState({mistakeCounter: this.state.mistakeCounter + 1}); break};
+      var nextMove = populateResultCellIfOnlyOnePotentialNumber(this.state.sudoku,constraints,!solve)
       if(nextMove['change']) {break};
-      var nextMove = removeMistakePotential(this.state.sudoku,this.state.winner,constraints,true)
-      if(nextMove['change']) {this.setState({showPotentialToggle: true}); break};
-      var nextMove = populateResultCellIfOnlyOnePotentialNumber(this.state.sudoku,constraints,true)
+      var nextMove = populateResultCellIfOnlyPotentialNumberInSameConstraint(this.state.sudoku,constraints,!solve)
       if(nextMove['change']) {break};
-      var nextMove = populateResultCellIfOnlyPotentialNumberInSameConstraint(this.state.sudoku,constraints,true)
-      if(nextMove['change']) {break};
-      var nextMove = eliminatePotentialNumbersInSameConstraint(this.state.sudoku,constraints,2,true)
+      var nextMove = eliminatePotentialNumbersInSameConstraint(this.state.sudoku,constraints,2,!solve)
       if(nextMove['change']) {this.setState({showPotentialToggle: true}); break};
-      var nextMove = eliminatePotentialNumbersInSameConstraint(this.state.sudoku,constraints,3,true)
+      var nextMove = eliminatePotentialNumbersInSameConstraint(this.state.sudoku,constraints,3,!solve)
       if(nextMove['change']) {this.setState({showPotentialToggle: true}); break};
-      var nextMove = eliminatePotentialNumbersInSameConstraint(this.state.sudoku,constraints,4,true)
+      var nextMove = eliminatePotentialNumbersInSameConstraint(this.state.sudoku,constraints,4,!solve)
       if(nextMove['change']) {this.setState({showPotentialToggle: true}); break};
       console.log('No more human moves!!')
       break;
     }
-      this.setState({
-        hintCellsChanged: nextMove['cellsChanged'],
-        hintNewValues: nextMove['newValues'],
-        hintRelevantConstraints: nextMove['relevantConstraints'],
-        hintType: nextMove['type'],
-        selectedCell: [null,null]
+    this.setState({
+      hintCellsChanged: solve ? [] : nextMove['cellsChanged'],
+      hintNewValues: solve ? [] :nextMove['newValues'],
+      hintRelevantConstraints: solve ? [] :nextMove['relevantConstraints'],
+      hintType: solve ? [] :nextMove['type'],
+      selectedCell: [null,null]
     })
-    if(hint2) {
+    if(solve) {
+      if (Platform.OS === 'web') {
+        alert(nextMove['solveText'])
+      } else {
+        Alert.alert(
+          "Here's your solution!", nextMove['solveText'],
+          [{text: "OK", onPress: () => console.log("OK Pressed")}],
+          {cancelable: false}
+        );
+      }
+      let seed = {preFilled: this.state.preFilled, winner: this.state.winner, sudoku: cleanup(this.state.sudoku,constraints)}; 
+      storeData(seed); // store progress
+    } else if(hint2) {
       if (Platform.OS === 'web') {
         alert(nextMove['hintText'])
       } else {
@@ -494,47 +513,6 @@ export class Game extends React.Component {
         );
       }
     }
-  }
-
-  handleSolveAlert(text) {
-    if (Platform.OS === 'web') {
-      alert(text)
-    } else {
-      Alert.alert(
-        "Here's your solution!", text,
-        [{text: "OK", onPress: () => console.log("OK Pressed")}],
-        {cancelable: false}
-      );
-    }
-  }
-
-  solveHint() {
-    while (true) {
-      var nextMove = removeMistakeResult(this.state.sudoku,this.state.winner,constraints,false)
-      if(nextMove['change']) {this.handleSolveAlert(nextMove['solveText']); break};
-      var nextMove = removeMistakePotential(this.state.sudoku,this.state.winner,constraints,false)
-      if(nextMove['change']) {this.setState({showPotentialToggle: true});this.handleSolveAlert(nextMove['solveText']); break};
-      var nextMove = populateResultCellIfOnlyOnePotentialNumber(this.state.sudoku,constraints,false)
-      if(nextMove['change']) {this.handleSolveAlert(nextMove['solveText']); break};
-      var nextMove = populateResultCellIfOnlyPotentialNumberInSameConstraint(this.state.sudoku,constraints,false)
-      if(nextMove['change']) {this.handleSolveAlert(nextMove['solveText']); break};
-      var nextMove = eliminatePotentialNumbersInSameConstraint(this.state.sudoku,constraints,2,false)
-      if(nextMove['change']) {this.setState({showPotentialToggle: true}); this.handleSolveAlert(nextMove['solveText']); break};
-      var nextMove = eliminatePotentialNumbersInSameConstraint(this.state.sudoku,constraints,3,false)
-      if(nextMove['change']) {this.setState({showPotentialToggle: true}); this.handleSolveAlert(nextMove['solveText']); break};
-      var nextMove = eliminatePotentialNumbersInSameConstraint(this.state.sudoku,constraints,4,false)
-      if(nextMove['change']) {this.setState({showPotentialToggle: true}); break};
-      console.log('No more human moves!!')
-      break;
-    }
-    let seed = {preFilled: this.state.preFilled, winner: this.state.winner, sudoku: cleanup(this.state.sudoku,constraints)}; 
-    storeData(seed); // store progress
-    this.setState({
-        hintCellsChanged: [],
-        hintNewValues: [],
-        hintRelevantConstraints: [],
-        hintType: [],
-    })
   }
 
   handleHint1() {
@@ -565,7 +543,7 @@ export class Game extends React.Component {
       h2Toggle: false,
       selectedCell: [null,null]
     })
-    this.solveHint(); 
+    this.generateHints(true,true)
   }
 
   checkWinner(winner, sudoku) {
@@ -575,7 +553,6 @@ export class Game extends React.Component {
          this.props.navigation.navigate('Winner');
        }
   }
-
 
   render() {
     // let { seedWinner } = this.props.route.params;
@@ -593,7 +570,9 @@ export class Game extends React.Component {
     // // storeData(seed); // store progress
     // this.checkWinner(seedWinner,seedSudoku);
     this.checkWinner(this.state.winner,this.state.sudoku);
-    console.log(this.state.hintCounter);
+    console.log(this.state.solveCounter)
+    console.log(this.state.hint1Counter)
+    console.log(this.state.hint2Counter)
     // console.log(console.time)
     return(
       <View style={[styles.container,{backgroundColor: this.state.colours['backgroundColor']}]}>
@@ -653,7 +632,7 @@ export class HomeScreen extends React.Component {
     let { continueButton } = this.props.route.params;
     this.state = {
       seed: null,
-      darkModeToggle: true,
+      darkModeToggle: false,
       continueButton: continueButton,
     }
   }
