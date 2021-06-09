@@ -117,7 +117,7 @@ const convert_base_10_to_x = function(x,new_base) {
     if(big <= 6) {
       return(parseInt(big.toString().concat(remainder)))
     } else {
-      return(parseInt(base_10_to_x(big,new_base).toString().concat(remainder)))
+      return(parseInt(convert_base_10_to_x(big,new_base).toString().concat(remainder)))
     }
 }
 
