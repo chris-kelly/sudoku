@@ -230,6 +230,7 @@ var eliminatePotentialNumbersInSameConstraint = function(s_dict,constraints,comp
         let col_indicies = vector_list.map(cs => cs.filter(col => col != 0).length > 0).flatMap((bool, index) => bool ? index : []) 
         // Get n choose k combinations of columns (where order matters)
         if(col_indicies.length >= comparisons) {
+            // generate n choose k combinations from indicies
             var combn_element_indicies = generate_n_choose_k_combination(col_indicies,comparisons)
             // get unique length of potential numbers in each of the combinations of columns
             let unique_num_combinations = combn_element_indicies.map(combn =>
