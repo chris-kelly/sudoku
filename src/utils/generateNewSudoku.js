@@ -299,7 +299,16 @@ const generateNewSudokuFromSeed = function(sudokuSets,constraints,reference=(
     pref = pref.map(row => row.map(x => x != 0 ? value_index[x-1] : 0).flat())
     win = win.map(row => row.map(x => value_index[x-1]).flat())
     let sudoku = cleanup(setupSudoku(pref),constraints)
-    return({'preFilled': pref, 'winner': win, 'sudoku': sudoku, 'time': console.time})
+    return({
+        'preFilled': pref, 
+        'winner': win, 
+        'sudoku': sudoku, 
+        'time': console.time,
+        'hintCellsChanged': [],
+        'hintNewValues': [],
+        'hintRelevantConstraints': [],
+        'hintType': false,
+    })
 }
 
 export {
