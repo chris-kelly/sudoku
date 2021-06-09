@@ -1,7 +1,7 @@
 // FUNCTIONS TO HELP WITH SUDOKU SOLVER
 
 import { matrix,reshape,index,flatten } from 'mathjs'
-import { gRange,generate_n_choose_k_combination } from './mathHelperFunctions'
+import { gRange,isItemInArray,generate_n_choose_k_combination } from './mathHelperFunctions'
 
 /**
  * When a result cell is populated, replace all numbers from the potential array for the same cell with zero
@@ -90,6 +90,10 @@ const removeMistakeResult = function(s_dict,winner,constraints,hint=false) {
     }
     if(!hint && change) {
         cellsChanged.map(x => s_dict['sudoku'].subset(index(x[0],x[1],gRange(0,9)),gRange(0,9)))
+        var indicies_to_repopulate = cellsChanged.map(c => 
+            constraints.map(x => isItemInArray(x, c.slice(0,2)).length > 0 ? x : []).flat()
+            ).flat() // also need to refill potential numbers in relevant constraints
+        indicies_to_repopulate.map(x => s_dict['sudoku'].subset(index(x[0],x[1],gRange(1,9)),gRange(1,9)))
         s_dict = cleanup(s_dict,constraints);
     }
     return({sudoku: s_dict['sudoku'],
