@@ -1,10 +1,11 @@
 // GENERATE NEW SUDOKU GAME
 
-import { matrix,index,subset,reshape,floor,random,transpose } from 'mathjs'
-import { gRange,shuffleArray } from './mathHelperFunctions'
+import { matrix,index,subset,reshape,floor,random,transpose,pow,add } from 'mathjs'
+import { gRange,shuffleArray,recursive_combinations,convert_base_10_to_x } from './mathHelperFunctions'
 import { cleanup } from './hintHelperFunctions'
 
-var sudokuSets = {
+// Sudoku seeds
+const sudokuSets = {
     'Easy': {
         1: {winner: 
             [[9, 2, 6, 8, 7, 1, 5, 3, 4],
@@ -220,38 +221,17 @@ var sudokuSets = {
     }     
 }
 
-var constraints = [
-    // rows
-    [[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,8]],
-    [[1,0],[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],[1,7],[1,8]],
-    [[2,0],[2,1],[2,2],[2,3],[2,4],[2,5],[2,6],[2,7],[2,8]],
-    [[3,0],[3,1],[3,2],[3,3],[3,4],[3,5],[3,6],[3,7],[3,8]],
-    [[4,0],[4,1],[4,2],[4,3],[4,4],[4,5],[4,6],[4,7],[4,8]],
-    [[5,0],[5,1],[5,2],[5,3],[5,4],[5,5],[5,6],[5,7],[5,8]],
-    [[6,0],[6,1],[6,2],[6,3],[6,4],[6,5],[6,6],[6,7],[6,8]],
-    [[7,0],[7,1],[7,2],[7,3],[7,4],[7,5],[7,6],[7,7],[7,8]],
-    [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,6],[8,7],[8,8]],
-    // columns
-    [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]],
-    [[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1]],
-    [[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2]],
-    [[0,3],[1,3],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3]],
-    [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4]],
-    [[0,5],[1,5],[2,5],[3,5],[4,5],[5,5],[6,5],[7,5],[8,5]],
-    [[0,6],[1,6],[2,6],[3,6],[4,6],[5,6],[6,6],[7,6],[8,6]],
-    [[0,7],[1,7],[2,7],[3,7],[4,7],[5,7],[6,7],[7,7],[8,7]],
-    [[0,8],[1,8],[2,8],[3,8],[4,8],[5,8],[6,8],[7,8],[8,8]],
-    // boxes
-    [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]],
-    [[3,0],[3,1],[3,2],[4,0],[4,1],[4,2],[5,0],[5,1],[5,2]],
-    [[6,0],[6,1],[6,2],[7,0],[7,1],[7,2],[8,0],[8,1],[8,2]],
-    [[0,3],[0,4],[0,5],[1,3],[1,4],[1,5],[2,3],[2,4],[2,5]],
-    [[3,3],[3,4],[3,5],[4,3],[4,4],[4,5],[5,3],[5,4],[5,5]],
-    [[6,3],[6,4],[6,5],[7,3],[7,4],[7,5],[8,3],[8,4],[8,5]],
-    [[0,6],[0,7],[0,8],[1,6],[1,7],[1,8],[2,6],[2,7],[2,8]],
-    [[3,6],[3,7],[3,8],[4,6],[4,7],[4,8],[5,6],[5,7],[5,8]],
-    [[6,6],[6,7],[6,8],[7,6],[7,7],[7,8],[8,6],[8,7],[8,8]]
-];
+// Constraints
+const cs_help = [0,3,6].map(i => gRange(i,i+2)) // helper for constraints
+const constraints = [
+    gRange(9).map(j => gRange(9).map(i => [j,i])), // rows
+    gRange(9).map(j => gRange(9).map(i => [i,j])), // cols
+    cs_help.flatMap(i2 => cs_help.map(j2 => [i2,j2])).map(x => x[0].map(i => x[1].map(j => [i,j])).flat()), // boxes
+].flat()
+
+const shuffle_line = recursive_combinations([0,1,2]) // helper for line shuffling in generateSudoku
+const shuffle_box = recursive_combinations([0,3,6]) // helper for box shuffling in generateSudoku
+const shuffle_9 = recursive_combinations(gRange(1,9)) // helper for number shuffling in generateSudoku
 
 /**
  * Setup sudoku object from pre-filled sudoku numbers 
@@ -282,27 +262,42 @@ const setupSudoku = function(preFilled) {
  * Setup sudoku object from pre-filled sudoku numbers 
  * @param {object} sudokuSets - Array of sets of prefilled/filled-in sudokus
  * @param {object} constraints - Array of constraints (e.g. row indicies, column indicies, box indicies) 
+ * @param {string} reference - Reference string of sudoku
  */
-const generateNewSudokuFromSeed = function(sudokuSets,constraints) {
-    // choose random sudoku seed
-    let sudoku_chosen = shuffleArray(Object.keys(sudokuSets))[0]
+const generateNewSudokuFromSeed = function(sudokuSets,constraints,reference=(
+        floor(random()*pow(6,8) + 1).toString() + '-' + 
+        floor(random()*shuffle_9.length + 1).toString() + '-' + 
+        // floor(random()*recursive_combinations(gRange(1,9)).length + 1).toString() + '-' +
+        floor(random()*3 + 1).toString()
+    )) {
+    // Parse reference
+    var [shuffle_index,value_index,seed_index] = reference.split('-').map(x => parseInt(x)) // index_converter(reference)
+    // Choose sudoku seed
+    let sudoku_chosen = Object.keys(sudokuSets)[seed_index-1]
     let pref = sudokuSets[sudoku_chosen]['preFilled']
     let win = sudokuSets[sudoku_chosen]['winner']
-    let r1 = shuffleArray([1,2,3]).map(x => shuffleArray([-1,-2,-3]).map(y => -4-y+x*3)).flat()
-    if(random() < 0.5) {r1 = r1.reverse()}
-    let r2 = shuffleArray([1,2,3]).map(x => shuffleArray([-1,-2,-3]).map(y => -4-y+x*3)).flat().reverse()
-    if(random() < 0.5) {r2 = r2.reverse()}
+    // Parse shuffle index
+    shuffle_index = convert_base_10_to_x(shuffle_index-1,6)
+    shuffle_index = '0'.repeat(8-shuffle_index.toString().length).concat(shuffle_index).split('').map(x => parseInt(x))
+    var generate_rowcol_shuffle_from_index = function(shuffle_index) {
+        var line_shuffle =  shuffle_index.slice(0,3)
+        var line_shuffle = line_shuffle.map(v => shuffle_line[v])
+        var box_shuffle = (shuffle_box[shuffle_index.slice(3,4)]).map(v => [v,v,v])
+        var result = line_shuffle.map((v,i) => add(v,box_shuffle[i]))
+        return(result.flat())
+      }
     // shuffle boxes row-wise and within-box rows
-    pref = subset(pref,index(r1,gRange(9)))
-    win = subset(win,index(r1,gRange(9)))
+    var row_index = generate_rowcol_shuffle_from_index(shuffle_index.slice(0,4))
+    pref = subset(pref,index(row_index,gRange(9)))
+    win = subset(win,index(row_index,gRange(9)))
     // shuffle boxes col-wise and within-box cols
-    pref = subset(pref,index(gRange(9),r2))
-    win = subset(win,index(gRange(9),r2))
+    var col_index = generate_rowcol_shuffle_from_index(shuffle_index.slice(4,8))
+    pref = subset(pref,index(gRange(9),col_index))
+    win = subset(win,index(gRange(9),col_index))
     // switch all the numbers around
-    let r3 = shuffleArray(gRange(1,9))
-    pref = pref.map(row => row.map(x => x != 0 ? r3[x-1] : 0).flat())
-    win = win.map(row => row.map(x => r3[x-1]).flat())
-    if(random() < 0.5) {pref = transpose(pref); win = transpose(win)}
+    value_index = shuffle_9[value_index-1]
+    pref = pref.map(row => row.map(x => x != 0 ? value_index[x-1] : 0).flat())
+    win = win.map(row => row.map(x => value_index[x-1]).flat())
     let sudoku = cleanup(setupSudoku(pref),constraints)
     return({'preFilled': pref, 'winner': win, 'sudoku': sudoku, 'time': console.time})
 }
@@ -313,4 +308,3 @@ export {
     setupSudoku as setupSudoku,
     generateNewSudokuFromSeed as generateNewSudokuFromSeed,
 }
-
