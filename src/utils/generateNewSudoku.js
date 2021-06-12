@@ -270,6 +270,7 @@ const generateNewSudokuFromSeed = function(sudokuSets,constraints,reference=(
         // floor(random()*recursive_combinations(gRange(1,9)).length + 1).toString() + '-' +
         floor(random()*3 + 1).toString()
     )) {
+    console.log(reference)
     // Parse reference
     var [shuffle_index,value_index,seed_index] = reference.split('-').map(x => parseInt(x)) // index_converter(reference)
     // Choose sudoku seed
