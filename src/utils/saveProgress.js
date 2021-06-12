@@ -29,8 +29,22 @@ const getData = async () => {
   }
 }
 
+/**
+ * Remove sudoku progress
+ */
+const removeData = async () => {
+  try {
+      await AsyncStorage.removeItem(key);
+      console.log('Successful deletion of old data')
+  }
+  catch(e) {
+    console.log('There has been an error deleting saved data!')
+  }
+}
+
 export {
   STORAGE_KEY as STORAGE_KEY,
   storeData as storeData,
   getData as getData,
+  removeData as removeData,
 }
