@@ -149,22 +149,22 @@ export class SudokuBoard extends React.Component {
         j = {j}
         onClick = {() => this.props.onClick(i,j)}
         textColor = {
-          element.length !== undefined && this.props.editPotentialToggle ? colours['userFilledTextPotential'] :
+          element.length !== undefined && this.props.pToggle == 'edit' ? colours['userFilledTextPotential'] : // 
           element.length !== undefined ? colours['userFilledText'] :
-          this.props.editPotentialToggle ? colours['preFilledTextPotential'] : 
+          this.props.pToggle == 'edit' ? colours['preFilledTextPotential'] : 
           colours['preFilledText']
         }
         potentialtextColor = {colours['potentialTextColor']}
         backgroundColor = {
-          JSON.stringify(this.props.selectedCell) === JSON.stringify([i,j]) ? (this.props.editPotentialToggle ? this.props.colours['selectedNumberPotential'] : colours['selectedNumber']) : // selected cell
+          JSON.stringify(this.props.selectedCell) === JSON.stringify([i,j]) ? (this.props.pToggle == 'edit' ? this.props.colours['selectedNumberPotential'] : colours['selectedNumber']) : // selected cell
           isItemInArray(this.props.hintCellsChanged.map(x => [x[0],x[1]]),[i,j]).length > 0 ? (this.props.hintType === 'mistake' ? colours['mistakeCell'] : colours['opportunityHighlight']) : // highlight wrong cell as red
-          (element === this.props.selectedValue || element[0] === this.props.selectedValue) && element != 0 ? (this.props.editPotentialToggle ? this.props.colours['selectedNumberPotential'] : colours['selectedNumber']) : // prefilled/userfilled cell is same as selected cell number // '#DFE3EE' : // '#474542' :
+          (element === this.props.selectedValue || element[0] === this.props.selectedValue) && element != 0 ? (this.props.pToggle == 'edit' ? this.props.colours['selectedNumberPotential'] : colours['selectedNumber']) : // prefilled/userfilled cell is same as selected cell number // '#DFE3EE' : // '#474542' :
           (isItemInArray(lightNumberIndicies,[i,j]).length > 0 || (element != 0 && element.length != 3)) && this.props.fToggle ? colours['floodlight'] : // same constraint as same number as selected cell, or prefilled, and flashlight mode turned on
           isItemInArray(this.props.hintCellsChanged,[i,j,0]).length > 0 || this.props.hintCellsChanged.filter(x => isItemInArray(x,[i,j,0]).length > 0).length > 0 ? colours['opportunityHighlight'] : // highlight hint cell(s)
           this.props.hintRelevantConstraints.filter(x => isItemInArray(x,[i,j]).length > 0).length > 0 ? colours['opportunityConstraintHighlight'] : // '#ffe1c5' : // '#AF5700' : // highlight relevant constraint hint cell(s)
           colours['cellBackground']
         }
-        borderColor = {this.props.editPotentialToggle ? this.props.colours['borderColorPotential'] : this.props.colours['borderColor']}
+        borderColor = {this.props.pToggle == 'edit' ? this.props.colours['borderColorPotential'] : this.props.colours['borderColor']}
         isSelectedCell = {JSON.stringify(this.props.selectedCell) === JSON.stringify([i,j])}
       />
     )
@@ -173,7 +173,7 @@ export class SudokuBoard extends React.Component {
     // Render cells in sudokuboard row
     return (
       <View style={[styles.sudokuRow,{
-        borderColor: this.props.editPotentialToggle ? this.props.colours['borderColorPotential'] : this.props.colours['borderColor'], 
+        borderColor: this.props.pToggle == 'edit' ? this.props.colours['borderColorPotential'] : this.props.colours['borderColor'], 
         borderTopWidth: checkIndexDivisibleThree(i) ? 2 : 0.5, borderBottomWidth: i === 8 ? 2 : 0.5}]}>
         {pRow.map((element,j) => this.renderSudokuCell(element,i,j,lightNumberIndicies))}
       </View>
@@ -185,7 +185,7 @@ export class SudokuBoard extends React.Component {
       if(lightNumber != 0) {
         var resultGrid = reshape(this.props.sudoku['sudoku'].subset(index(gRange(9),gRange(9),0))._data,[9,9])
         var lightNumberIndicies = resultGrid.map((x,ind) => isItemInArray(x,lightNumber).length > 0 ? [ind,isItemInArray(x,lightNumber)[0]] : null).filter(x => x != null)
-        var lightNumberIndicies = lightNumberIndicies.map(y => this.props.constraints.filter(x => isItemInArray(x,y).length > 0).flat()).flat()
+        var lightNumberIndicies = lightNumberIndicies.map(y => constraints.filter(x => isItemInArray(x,y).length > 0).flat()).flat()
       } else {
         var lightNumberIndicies = 0
       }
@@ -193,7 +193,7 @@ export class SudokuBoard extends React.Component {
       var lightNumberIndicies = 0
     }
     // Render each sudokuboard row
-    var megaGrid = megaSudokuInput(reshape(this.props.preFilled,[9,9]),this.props.sudoku,this.props.showPotentialGrid);
+    var megaGrid = megaSudokuInput(reshape(this.props.preFilled,[9,9]),this.props.sudoku,this.props.pToggle != 'hide');
     return(
       megaGrid.map((pRow,i) => this.renderSudokuRow(pRow,i,lightNumberIndicies))
     )
@@ -212,15 +212,15 @@ export class NumberSelector extends React.Component {
         value = {element}
         onClick = {() => this.props.onClick(element)}// {this.onClick}
         backgroundColor = {(complete ? this.props.colours['floodlight']: this.props.colours['cellBackground'])} // make this grey if filled in 
-        textColor = {this.props.editPotentialToggle ? this.props.colours['preFilledTextPotential'] : this.props.colours['preFilledText']}
-        borderColor = {this.props.editPotentialToggle ? this.props.colours['borderColorPotential'] : this.props.colours['borderColor']}
+        textColor = {this.props.pToggle == 'edit' ? this.props.colours['preFilledTextPotential'] : this.props.colours['preFilledText']}
+        borderColor = {this.props.pToggle == 'edit' ? this.props.colours['borderColorPotential'] : this.props.colours['borderColor']}
       />
     )
   }
   render() {    
     return(
       <View style={[styles.sudokuRow,{
-        borderColor: this.props.editPotentialToggle ? this.props.colours['borderColorPotential'] : this.props.colours['borderColor'], 
+        borderColor: this.props.pToggle ? this.props.colours['borderColorPotential'] : this.props.colours['borderColor'], 
         borderWidth: 2
         }]}>
         {gRange(1,9).map((x,i) => this.renderNumberSelectorCell(x,this.props.completeNumbers[i]))}
@@ -241,8 +241,8 @@ export class HintSelector extends React.Component {
         <TouchableHighlight onPress={() => this.props.p2Click()}>
           <Image style={imgStyle}
           source={
-            this.props.pToggle ? require('./src/img/hidePotential.jpg') :
-            this.props.spToggle ? require('./src/img/editPotential.jpg') :
+            this.props.pToggle == 'edit' ? require('./src/img/hidePotential.jpg') :
+            this.props.pToggle == 'show' ? require('./src/img/editPotential.jpg') :
             require('./src/img/showPotential.jpg')
           }
           />
@@ -284,12 +284,10 @@ export class Game extends React.Component {
       h1Toggle, h2Toggle,
     } = this.props.route.params;
     this.state = {
-      constraints: constraints,  
-      sudoku: seedSudoku,
-      preFilled: reshape(seedPreFilled,[9,9]),
-      seedWinner: reshape(seedWinner,[9,9]),
-      showPotentialToggle: false,
-      editPotentialToggle: false,
+      sudoku: seedSudoku, // 9x9x9 matrix, made up of user and pre-filled values. Populated with 0 if not filled in. 
+      preFilled: reshape(seedPreFilled,[9,9]), // 9x9 matrix, made up of pre-filled values in the sudoku
+      seedWinner: reshape(seedWinner,[9,9]), // 9x9 matrix, made up of the winning sudoku values
+      pToggle: 'hide',
       flashlightToggle: false,
       h1Toggle: h1Toggle,
       h2Toggle: h2Toggle,
@@ -329,7 +327,7 @@ export class Game extends React.Component {
     if( // Edit result cell
       i != null // cell selected
       && this.state.preFilled[i][j] === 0 // not prefilled
-      && !(this.state.editPotentialToggle) // change result number, not potential
+      && this.state.pToggle != 'edit' // change result number, not potential
       ) {
         if(s_dict['sudoku'].subset(index(i,j,0)) != k) {
           s_dict['sudoku'] = s_dict['sudoku'].subset(index(i,j,0),k) // set result cell to k
@@ -344,7 +342,7 @@ export class Game extends React.Component {
       i != null 
       && k != 0
       && this.state.preFilled[i][j] === 0
-      && this.state.editPotentialToggle // change potential number, not result
+      && this.state.pToggle == 'edit' // change potential number, not result
       ) {
         if(s_dict['sudoku'].subset(index(i,j,k)) === 0) {
           s_dict['sudoku'].subset(index(i,j,k),k) // add k to potential cell
@@ -391,35 +389,13 @@ export class Game extends React.Component {
     storeData(seed);
   }
 
-  handleShowPotentialGrid() {
-    this.setState({
-      showPotentialToggle: !this.state.showPotentialToggle,
-    });
-  };
-
-  handleEditPotentialGrid() {
-    this.setState({
-      editPotentialToggle: !this.state.editPotentialToggle,
-      showPotentialToggle: true,
-    });
-  };
-
   handlePotentialGrid() {
-    if(this.state.editPotentialToggle) { // already editing potential grid
-      this.setState({ // hide everything
-        editPotentialToggle: false,
-        showPotentialToggle: false,
-      })
-    } else if(this.state.showPotentialToggle) { // already showing potential grid
-      this.setState({ // edit potential grid
-        editPotentialToggle: true,
-        showPotentialToggle: true,
-      })
+    if(this.state.pToggle == 'edit') { // already editing potential grid
+      this.setState({pToggle: 'hide'}) // hide everything        
+    } else if(this.state.pToggle == 'show') { // already showing potential grid
+      this.setState({pToggle: 'edit'})
     } else { // not showing potential grid
-      this.setState({ // show potential grid (no edit)
-        editPotentialToggle: false,
-        showPotentialToggle: true,
-      })
+      this.setState({pToggle: 'show'})
     }
   };
 
@@ -445,17 +421,17 @@ export class Game extends React.Component {
           if(!hint2) {this.setState({mistakeCounter: this.state.mistakeCounter + 1})} break
         };
         var nextMove = removeMistakePotential(this.state.sudoku,this.state.winner,constraints,!solve)
-        if(nextMove['change']) {this.setState({showPotentialToggle: true}); this.setState({mistakeCounter: this.state.mistakeCounter + 1}); break};
+        if(nextMove['change']) {this.setState({pToggle: 'show'}); this.setState({mistakeCounter: this.state.mistakeCounter + 1}); break};
         var nextMove = populateResultCellIfOnlyOnePotentialNumber(this.state.sudoku,constraints,!solve)
         if(nextMove['change']) {break};
         var nextMove = populateResultCellIfOnlyPotentialNumberInSameConstraint(this.state.sudoku,constraints,!solve)
         if(nextMove['change']) {break};
         var nextMove = eliminatePotentialNumbersInSameConstraint(this.state.sudoku,constraints,2,!solve)
-        if(nextMove['change']) {this.setState({showPotentialToggle: true}); break};
+        if(nextMove['change']) {this.setState({pToggle: 'show'}); break};
         var nextMove = eliminatePotentialNumbersInSameConstraint(this.state.sudoku,constraints,3,!solve)
-        if(nextMove['change']) {this.setState({showPotentialToggle: true}); break};
+        if(nextMove['change']) {this.setState({pToggle: 'show'}); break};
         var nextMove = eliminatePotentialNumbersInSameConstraint(this.state.sudoku,constraints,4,!solve)
-        if(nextMove['change']) {this.setState({showPotentialToggle: true}); break};
+        if(nextMove['change']) {this.setState({pToggle: 'show'}); break};
         console.log('No more human moves!!')
         break;
       }
@@ -574,9 +550,7 @@ export class Game extends React.Component {
         <SudokuBoard 
           preFilled = {this.state.preFilled} // {seedPreFilled}
           sudoku = {this.state.sudoku} // {seedSudoku}
-          constraints = {this.state.constraints}
-          showPotentialGrid = {this.state.showPotentialToggle}
-          editPotentialToggle = {this.state.editPotentialToggle}
+          pToggle = {this.state.pToggle}
           fToggle = {this.state.flashlightToggle}
           selectedCell = {this.state.selectedCell}
           selectedValue = {this.state.selectedValue}
@@ -596,12 +570,11 @@ export class Game extends React.Component {
           completeNumbers = {
             gRange(1,9).map(x => this.state.sudoku['sudoku'].subset(index(gRange(9),gRange(9),0))._data.flat().flat().filter(y => x === y).length === 9)
           }
-          editPotentialToggle = {this.state.editPotentialToggle}
+          pToggle = {this.state.pToggle}
         />
         <View style={[{height: 10}]}></View>
         <HintSelector
-          pToggle = {this.state.editPotentialToggle}
-          spToggle = {this.state.showPotentialToggle}
+          pToggle = {this.state.pToggle}
           fClick = {() => this.handleFlashlight()}
           fToggle = {this.state.flashlightToggle}
           h1Click = {() => this.handleHint1()}
