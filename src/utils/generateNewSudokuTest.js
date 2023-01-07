@@ -5,7 +5,7 @@ import { gRange,shuffleArray,recursive_combinations,convert_base_10_to_x } from 
 import { cleanup } from './hintHelperFunctions'
 
 // Sudoku seeds
-const sudokuSets = {
+var sudokuSets = {
     'Easy': {
         1: {winner: 
             [[9, 2, 6, 8, 7, 1, 5, 3, 4],
@@ -222,22 +222,22 @@ const sudokuSets = {
 }
 
 // Constraints
-const cs_help = [0,3,6].map(i => gRange(i,i+2)) // helper for constraints
-const constraints = [
+var cs_help = [0,3,6].map(i => gRange(i,i+2)) // helper for constraints
+var constraints = [
     gRange(9).map(j => gRange(9).map(i => [j,i])), // rows
     gRange(9).map(j => gRange(9).map(i => [i,j])), // cols
     cs_help.flatMap(i2 => cs_help.map(j2 => [i2,j2])).map(x => x[0].map(i => x[1].map(j => [i,j])).flat()), // boxes
 ].flat()
 
-const shuffle_line = recursive_combinations([0,1,2]) // helper for line shuffling in generateSudoku
-const shuffle_box = recursive_combinations([0,3,6]) // helper for box shuffling in generateSudoku
-const shuffle_9 = recursive_combinations(gRange(1,9)) // helper for number shuffling in generateSudoku
+var shuffle_line = recursive_combinations([0,1,2]) // helper for line shuffling in generateSudoku
+var shuffle_box = recursive_combinations([0,3,6]) // helper for box shuffling in generateSudoku
+var shuffle_9 = recursive_combinations(gRange(1,9)) // helper for number shuffling in generateSudoku
 
 /**
  * Setup sudoku object from pre-filled sudoku numbers 
  * @param {object} preFilled - Array of pre-filled sudoku numbers. Missing cells recorded as a zero.
  */
-const setupSudoku = function(preFilled) {
+var setupSudoku = function(preFilled) {
     // Create 3d matrix of zeros
     let sudoku = matrix(
         reshape(
@@ -264,7 +264,7 @@ const setupSudoku = function(preFilled) {
  * @param {object} constraints - Array of constraints (e.g. row indicies, column indicies, box indicies) 
  * @param {string} reference - Reference string of sudoku
  */
-const generateNewSudokuFromSeed = function(sudokuSets,constraints,reference=(
+var generateNewSudokuFromSeed = function(sudokuSets,constraints,reference=(
         floor(random()*pow(6,8) + 1).toString() + '-' + 
         floor(random()*shuffle_9.length + 1).toString() + '-' + 
         // floor(random()*recursive_combinations(gRange(1,9)).length + 1).toString() + '-' +
