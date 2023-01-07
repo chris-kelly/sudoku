@@ -34,10 +34,9 @@ const getData = async () => {
  */
 const removeData = async () => {
   try {
-      await AsyncStorage.removeItem(key);
+      await AsyncStorage.removeItem(STORAGE_KEY);
       console.log('Successful deletion of old data')
-  }
-  catch(e) {
+  } catch(e) {
     console.log('There has been an error deleting saved data!')
   }
 }
