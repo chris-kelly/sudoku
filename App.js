@@ -713,7 +713,7 @@ export class HomeScreen extends React.Component {
 /**
  * Difficulty screen
  */
-export class newGameDifficulty extends React.Component {
+export class NewGameDifficulty extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -789,7 +789,7 @@ export class newGameDifficulty extends React.Component {
 /** 
  * Winner screen 
  */
-export class winnerScreen extends React.Component {
+export class WinnerScreen extends React.Component {
   continue() {
     if (Platform.OS === 'web') {
       let c = confirm('Well done! Play again?')
@@ -853,7 +853,7 @@ export class MyStack extends React.Component {
           />
           <Stack.Screen 
             name="Difficulty"
-            component={newGameDifficulty} 
+            component={NewGameDifficulty} 
             options={{
               cardStyle: {
                 backgroundColor: '#F7F7F7'
@@ -871,7 +871,7 @@ export class MyStack extends React.Component {
             />
           <Stack.Screen 
             name="Winner"
-            component={winnerScreen}
+            component={WinnerScreen}
             options={{
               cardStyle: {
                 backgroundColor: '#F7F7F7'
