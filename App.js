@@ -5,8 +5,7 @@ import { TouchableHighlight, TouchableOpacity, StyleSheet, Text, View, Button, I
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, HeaderBackButton} from '@react-navigation/stack';
 import 'react-native-gesture-handler';
-import { AsyncStorage } from 'react-native';
-import {index,reshape,subset,floor,matrix} from 'mathjs'
+import {index,reshape,matrix} from 'mathjs'
 
 // Tailored libraries
 import {styles,lightMode,darkMode} from './src/styles/Styles.js'
@@ -287,8 +286,8 @@ export class Game extends React.Component {
       sudoku: seedSudoku, // 9x9x9 matrix, made up of user and pre-filled values. Populated with 0 if not filled in. 
       preFilled: reshape(seedPreFilled,[9,9]), // 9x9 matrix, made up of pre-filled values in the sudoku
       seedWinner: reshape(seedWinner,[9,9]), // 9x9 matrix, made up of the winning sudoku values
-      pToggle: 'hide',
-      flashlightToggle: false,
+      pToggle: 'hide', // toggle to state whether to 'hide', 'show' or 'edit' the potential numbers
+      flashlightToggle: false, // toggle to state whether to activate flashlight mode
       h1Toggle: h1Toggle,
       h2Toggle: h2Toggle,
       selectedCell: [null,null],
