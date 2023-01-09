@@ -12,6 +12,7 @@ import {
   cellViewStyle,
   cellTextStyle,
   numberValueRender,
+  cellBackgroundColor,
   megaSudokuInput,
 } from './src/utils/renderHelperFunctions'
 import {isItemInArray,gRange} from './src/utils/mathHelperFunctions'
@@ -95,39 +96,6 @@ const RenderCell = (props) => {
     return <PotentialCell props = {props}/>
   }
 }
-  
-// const cellBackgroundColor = (props) => {
-
-//   if (
-//     JSON.stringify(props.selectedCell) === JSON.stringify([i,j]) // cell is selected by user
-//     ) { 
-//       let bgColor = props.pToggle == 'edit' ? props.colours['selectedNumberPotential'] : colours['selectedNumber'] // different colour depending on whether "edit" potential cell mode is turned on
-//   } else if (
-//     isItemInArray(props.hintCellsChanged.map(x => [x[0],x[1]]),[i,j]).length > 0 // hint cell: either has an error or opportunity (hintCellsChanged generates both) 
-//     ) { 
-//       let bgColor = props.hintType === 'mistake' ? colours['mistakeCell'] : colours['opportunityHighlight'])
-//   } else if(
-//     (element === this.props.selectedValue && element != 0) || element[0] === this.props.selectedValue // pre-filled or user-filled is same as number selected
-//   ) {
-//     let bgColor = props.pToggle == 'edit' ? props.colours['selectedNumberPotential'] : colours['selectedNumber'] // NB same as first if statement, but error/hint colour takes priority over this one
-//   } else if(
-//     props.fToggle && // flashlight mode turned on 
-//     (isItemInArray(lightNumberIndicies,[i,j]).length > 0 || (element != 0 && element.length != 3)) // same constraint as same number as selected cell, or prefilled
-//   ) {
-//     let bgColor = colours['floodlight']
-//   } else if(
-//     isItemInArray(this.props.hintCellsChanged,[i,j,0]).length > 0 || // highlight hint cell(s)
-//     props.hintCellsChanged.filter(x => isItemInArray(x,[i,j,0]).length > 0).length > 0 // highlight hint cell(s)
-//   ) {
-//     let bgColor = colours['opportunityHighlight']
-//   } else if(
-//     props.hintRelevantConstraints.filter(x => isItemInArray(x,[i,j]).length > 0).length > 0 // highlight relevant constraint hint cell(s)
-//   ) {
-//     let bgColor = colours['opportunityConstraintHighlight']
-//   }
-
-//   return bgColor
-// }
 
   /**
    * Render entire sudoku board
@@ -144,7 +112,7 @@ const RenderCell = (props) => {
       let colours = this.props.colours;
       return (
         <RenderCell
-          key = {'SudokuBoardCells_'+i.toString() + j.toString()} 
+          key = {'SudokuBoardCells_' + i.toString() + j.toString()} 
           value = {element}
           i = {i}
           j = {j}
@@ -156,17 +124,9 @@ const RenderCell = (props) => {
             colours['preFilledText']
           }
           potentialtextColor = {colours['potentialTextColor']}
-          backgroundColor = {
-            JSON.stringify(this.props.selectedCell) === JSON.stringify([i,j]) ? (this.props.pToggle == 'edit' ? this.props.colours['selectedNumberPotential'] : colours['selectedNumber']) : // selected cell
-            isItemInArray(this.props.hintCellsChanged.map(x => [x[0],x[1]]),[i,j]).length > 0 ? (this.props.hintType === 'mistake' ? colours['mistakeCell'] : colours['opportunityHighlight']) : // highlight wrong cell as red
-            (element === this.props.selectedValue || element[0] === this.props.selectedValue) && element != 0 ? (this.props.pToggle == 'edit' ? this.props.colours['selectedNumberPotential'] : colours['selectedNumber']) : // prefilled/userfilled cell is same as selected cell number
-            (isItemInArray(lightNumberIndicies,[i,j]).length > 0 || (element != 0 && element.length != 3)) && this.props.fToggle ? colours['floodlight'] : // same constraint as same number as selected cell, or prefilled, and flashlight mode turned on
-            isItemInArray(this.props.hintCellsChanged,[i,j,0]).length > 0 || this.props.hintCellsChanged.filter(x => isItemInArray(x,[i,j,0]).length > 0).length > 0 ? colours['opportunityHighlight'] : // highlight hint cell(s)
-            this.props.hintRelevantConstraints.filter(x => isItemInArray(x,[i,j]).length > 0).length > 0 ? colours['opportunityConstraintHighlight'] : // '#ffe1c5' : // '#AF5700' : // highlight relevant constraint hint cell(s)
-            colours['cellBackground']
-          }
+          backgroundColor = {cellBackgroundColor(this.props, element, i, j, lightNumberIndicies)}
           borderColor = {this.props.pToggle == 'edit' ? this.props.colours['borderColorPotential'] : this.props.colours['borderColor']}
-          isSelectedCell = {JSON.stringify(this.props.selectedCell) === JSON.stringify([i,j])}
+          isSelectedCell = {stri(this.props.selectedCell) === stri([i,j])}
         />
       )
     }
@@ -549,6 +509,7 @@ const RenderCell = (props) => {
       return(
         <View style={[styles.container,{backgroundColor: this.state.colours['backgroundColor']}]}>
           <SudokuBoard 
+            props = {this.state.props}
             preFilled = {this.state.preFilled} // {seedPreFilled}
             sudoku = {this.state.sudoku} // {seedSudoku}
             pToggle = {this.state.pToggle}

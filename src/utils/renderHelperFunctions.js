@@ -1,7 +1,8 @@
 // FUNCTIONS TO HELP WITH RENDERING
 
 import { reshape,index } from 'mathjs'
-import { gRange } from './mathHelperFunctions'
+import { gRange, isItemInArray } from './mathHelperFunctions'
+let stri = JSON.stringify.bind({})
 
 /**
  * Check if index is divisible by 3 (to make every 3rd border thicker in sudoku grid)
@@ -42,6 +43,42 @@ export const numberValueRender = function(rValue) {
   let valueRender = rValue === 0 ? null : rValue;
   return(valueRender)
 }
+
+export const cellBackgroundColor = (props, element, i, j, lightNumberIndicies) => {
+  
+    let prop = props
+    let colours = prop.colours
+  
+    if (
+      stri(prop.selectedCell) === stri([i,j]) // cell is selected by user
+      ) { 
+        return prop.pToggle == 'edit' ? prop.colours['selectedNumberPotential'] : colours['selectedNumber'] // different colour depending on whether "edit" potential cell mode is turned on
+    } else if (
+      isItemInArray(prop.hintCellsChanged.map(x => [x[0],x[1]]),[i,j]).length > 0 // hint cell: either has an error or opportunity (hintCellsChanged generates both) 
+      ) { 
+        return prop.hintType === 'mistake' ? colours['mistakeCell'] : colours['opportunityHighlight']
+    } else if(
+      (element === prop.selectedValue && element != 0) || element[0] === prop.selectedValue // pre-filled or user-filled is same as number selected
+    ) {
+      return prop.pToggle == 'edit' ? prop.colours['selectedNumberPotential'] : colours['selectedNumber'] // NB same as first if statement, but error/hint colour takes priority over this one
+    } else if(
+      prop.fToggle && // flashlight mode turned on 
+      (isItemInArray(lightNumberIndicies,[i,j]).length > 0 || (element != 0 && element.length != 3)) // same constraint as same number as selected cell, or prefilled
+    ) {
+      return colours['floodlight']
+    } else if(
+      isItemInArray(prop.hintCellsChanged,[i,j,0]).length > 0 || // highlight hint cell(s)
+      prop.hintCellsChanged.filter(x => isItemInArray(x,[i,j,0]).length > 0).length > 0 // highlight hint cell(s)
+    ) {
+      return colours['opportunityHighlight']
+    } else if(
+      prop.hintRelevantConstraints.filter(x => isItemInArray(x,[i,j]).length > 0).length > 0 // highlight relevant constraint hint cell(s)
+    ) {
+      return colours['opportunityConstraintHighlight']
+    } else {
+      return colours['cellBackground'] // default colour before anything else has loaded
+    }
+  }
 
 // 
 /**
