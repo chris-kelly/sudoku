@@ -2,6 +2,7 @@
 import React from 'react'
 import {TouchableHighlight, Text, View, Image, Alert, Platform } from 'react-native'
 import {index,reshape} from 'mathjs'
+let stri = JSON.stringify.bind({})
 
 // Custom libraries
 import {styles} from './src/styles/Styles.js'
@@ -23,97 +24,111 @@ import {
 /*
  * Render pre/user-filled cells in the sudoku board.
  */
-export class NormalCell extends React.Component {
-    render() {
-      return (
-        <TouchableHighlight onPress={this.props.onClick}>
-          <View style={cellViewStyle(props = this.props, defaultStyle = styles.sudokuCell)}>
-            <Text style={cellTextStyle(props = this.props, defaultStyle = styles.defaultText)}> 
-              {numberValueRender(rValue = this.props.value)}
-            </Text>
-          </View>
-        </TouchableHighlight>
-      )
-    }
-  }
+const NormalCell = (props) => {
+  let prop = props.props
+  return (
+    <TouchableHighlight onPress={prop.onClick}>
+      <View style={cellViewStyle(props = prop, defaultStyle = styles.sudokuCell)}>
+        <Text style={cellTextStyle(props = prop, defaultStyle = styles.defaultText)}> 
+          {numberValueRender(rValue = prop.value)}
+        </Text>
+      </View>
+    </TouchableHighlight>
+  )
+}
 
 /**
  * Render potential number cells in the sudoku board
- */
- export class PotentialCell extends React.Component {
-    /**
-     * Render individual number in potential cell row array
-     * @param {number} rValue - Number that is rendered. If zero, rendered as null.
-     */
-    PotentialValue(rValue) {
-      return (
-        <View style={styles.potentialCell}>
-          <Text style={cellTextStyle(props = this.props, defaultStyle = styles.potentialText)}> 
-            {numberValueRender(rValue = rValue)}
-          </Text>
-        </View>
-      )
-    }
-    /**
-     * Render potential number row (there are 3 rows per potential cell, 0:2, 3:5, 6:8)
-     * @param {object} potentialRow - Array of potential numbers to render
-     */
-    PotentialValueRow(potentialRow) {
-      return (
-        <View style={[styles.sudokuRow,{borderColor: this.props.borderColor}]}>
-          {potentialRow.map(potentialCol => this.PotentialValue(potentialCol))}
-        </View>
-      )
-    }
-    /**
-     * Render potential number cell (dim 3x3)
-     */
-    render() {
-      return (
-        <TouchableHighlight onPress={this.props.onClick}>
-          <View style={cellViewStyle(props = this.props, defaultStyle = styles.sudokuCell)}>
-            {this.props.value.map(potentialRow => this.PotentialValueRow(potentialRow))}
-          </View>
-        </TouchableHighlight>
-      )
-    }
+ **/
+const PotentialCell = (props) => {
+
+  let prop = props.props
+
+  /**
+   * Render individual number in potential cell row array
+   * @param {number} rValue - Number that is rendered. If zero, rendered as null.
+   **/
+  let PotentialValue = function(rValue)  {
+    return (
+      <View style={styles.potentialCell}>
+        <Text style={cellTextStyle(props = prop, defaultStyle = styles.potentialText)}> 
+          {numberValueRender(rValue = rValue)}
+        </Text>
+      </View>
+    )
   }
+
+  /**
+   * Render potential number row (there are 3 rows per potential cell, 0:2, 3:5, 6:8)
+   * @param {object} potentialRow - Array of potential numbers to render
+   **/
+  let PotentialValueRow = function(potentialRow) {
+    return (
+      <View style={[styles.sudokuRow,{borderColor: prop.borderColor}]}>
+        {potentialRow.map(potentialCol => PotentialValue(potentialCol))}
+      </View>
+    )
+  }
+
+  /**
+   * Render potential number cell (dim 3x3)
+   **/
+  return (
+    <TouchableHighlight onPress={prop.onClick}>
+      <View style={cellViewStyle(props = prop, defaultStyle = styles.sudokuCell)}>
+        {prop.value.map(potentialRow => PotentialValueRow(potentialRow))}
+      </View>
+    </TouchableHighlight>
+  )
+
+}
   
 /**
  * Render any cells in sudokuboard (either pre, user-filled or potential cells depending on output from megagrid function)
  * @see {@link megaSudokuInput} 
  * @param {*} props 
  */
- const RenderCell = (props) => {
-    if(props.value.length === undefined || props.value.length === 1) { // if pre-filled or user-filled (else render potential grid) 
-      return(
-        <NormalCell
-          value = {props.value} 
-          onClick = {props.onClick}
-          textColor = {props.textColor}
-          backgroundColor = {props.backgroundColor}
-          borderColor = {props.borderColor}
-          i = {props.i}
-          j = {props.j}
-          isSelectedCell = {props.isSelectedCell}
-        />
-        )
-    } else {
-      return(
-        <PotentialCell
-          value = {props.value}
-          onClick = {props.onClick}
-          textColor = {props.potentialtextColor}
-          backgroundColor = {props.backgroundColor}
-          borderColor = {props.borderColor}
-          i = {props.i}
-          j = {props.j}
-          isSelectedCell = {props.isSelectedCell}
-        />
-        )
-    }
+const RenderCell = (props) => {
+  if(props.value.length === undefined || props.value.length === 1) { // if pre-filled or user-filled (else render potential grid) 
+    return <NormalCell props = {props}/>
+  } else {
+    return <PotentialCell props = {props}/>
   }
+}
   
+// const cellBackgroundColor = (props) => {
+
+//   if (
+//     JSON.stringify(props.selectedCell) === JSON.stringify([i,j]) // cell is selected by user
+//     ) { 
+//       let bgColor = props.pToggle == 'edit' ? props.colours['selectedNumberPotential'] : colours['selectedNumber'] // different colour depending on whether "edit" potential cell mode is turned on
+//   } else if (
+//     isItemInArray(props.hintCellsChanged.map(x => [x[0],x[1]]),[i,j]).length > 0 // hint cell: either has an error or opportunity (hintCellsChanged generates both) 
+//     ) { 
+//       let bgColor = props.hintType === 'mistake' ? colours['mistakeCell'] : colours['opportunityHighlight'])
+//   } else if(
+//     (element === this.props.selectedValue && element != 0) || element[0] === this.props.selectedValue // pre-filled or user-filled is same as number selected
+//   ) {
+//     let bgColor = props.pToggle == 'edit' ? props.colours['selectedNumberPotential'] : colours['selectedNumber'] // NB same as first if statement, but error/hint colour takes priority over this one
+//   } else if(
+//     props.fToggle && // flashlight mode turned on 
+//     (isItemInArray(lightNumberIndicies,[i,j]).length > 0 || (element != 0 && element.length != 3)) // same constraint as same number as selected cell, or prefilled
+//   ) {
+//     let bgColor = colours['floodlight']
+//   } else if(
+//     isItemInArray(this.props.hintCellsChanged,[i,j,0]).length > 0 || // highlight hint cell(s)
+//     props.hintCellsChanged.filter(x => isItemInArray(x,[i,j,0]).length > 0).length > 0 // highlight hint cell(s)
+//   ) {
+//     let bgColor = colours['opportunityHighlight']
+//   } else if(
+//     props.hintRelevantConstraints.filter(x => isItemInArray(x,[i,j]).length > 0).length > 0 // highlight relevant constraint hint cell(s)
+//   ) {
+//     let bgColor = colours['opportunityConstraintHighlight']
+//   }
+
+//   return bgColor
+// }
+
   /**
    * Render entire sudoku board
    */
@@ -144,7 +159,7 @@ export class NormalCell extends React.Component {
           backgroundColor = {
             JSON.stringify(this.props.selectedCell) === JSON.stringify([i,j]) ? (this.props.pToggle == 'edit' ? this.props.colours['selectedNumberPotential'] : colours['selectedNumber']) : // selected cell
             isItemInArray(this.props.hintCellsChanged.map(x => [x[0],x[1]]),[i,j]).length > 0 ? (this.props.hintType === 'mistake' ? colours['mistakeCell'] : colours['opportunityHighlight']) : // highlight wrong cell as red
-            (element === this.props.selectedValue || element[0] === this.props.selectedValue) && element != 0 ? (this.props.pToggle == 'edit' ? this.props.colours['selectedNumberPotential'] : colours['selectedNumber']) : // prefilled/userfilled cell is same as selected cell number // '#DFE3EE' : // '#474542' :
+            (element === this.props.selectedValue || element[0] === this.props.selectedValue) && element != 0 ? (this.props.pToggle == 'edit' ? this.props.colours['selectedNumberPotential'] : colours['selectedNumber']) : // prefilled/userfilled cell is same as selected cell number
             (isItemInArray(lightNumberIndicies,[i,j]).length > 0 || (element != 0 && element.length != 3)) && this.props.fToggle ? colours['floodlight'] : // same constraint as same number as selected cell, or prefilled, and flashlight mode turned on
             isItemInArray(this.props.hintCellsChanged,[i,j,0]).length > 0 || this.props.hintCellsChanged.filter(x => isItemInArray(x,[i,j,0]).length > 0).length > 0 ? colours['opportunityHighlight'] : // highlight hint cell(s)
             this.props.hintRelevantConstraints.filter(x => isItemInArray(x,[i,j]).length > 0).length > 0 ? colours['opportunityConstraintHighlight'] : // '#ffe1c5' : // '#AF5700' : // highlight relevant constraint hint cell(s)
