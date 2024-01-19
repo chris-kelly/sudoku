@@ -29,9 +29,9 @@ const NormalCell = (props) => {
   let prop = props.props
   return (
     <TouchableHighlight onPress={prop.onClick}>
-      <View style={cellViewStyle(props = prop, defaultStyle = styles.sudokuCell)}>
-        <Text style={cellTextStyle(props = prop, defaultStyle = styles.defaultText)}> 
-          {numberValueRender(rValue = prop.value)}
+      <View style={cellViewStyle( prop, styles.sudokuCell)}>
+        <Text style={cellTextStyle( prop, styles.defaultText )}> 
+          {numberValueRender(prop.value)}
         </Text>
       </View>
     </TouchableHighlight>
@@ -52,8 +52,8 @@ const PotentialCell = (props) => {
   let PotentialValue = function(rValue)  {
     return (
       <View style={styles.potentialCell}>
-        <Text style={cellTextStyle(props = prop, defaultStyle = styles.potentialText)}> 
-          {numberValueRender(rValue = rValue)}
+        <Text style={cellTextStyle(prop, styles.potentialText)}> 
+          {numberValueRender(rValue)}
         </Text>
       </View>
     )
@@ -65,7 +65,7 @@ const PotentialCell = (props) => {
    **/
   let PotentialValueRow = function(potentialRow) {
     return (
-      <View style={[styles.sudokuRow,{borderColor: prop.borderColor}]}>
+      <View style={[styles.sudokuRow, {borderColor: prop.borderColor}]}>
         {potentialRow.map(potentialCol => PotentialValue(potentialCol))}
       </View>
     )
@@ -76,7 +76,7 @@ const PotentialCell = (props) => {
    **/
   return (
     <TouchableHighlight onPress={prop.onClick}>
-      <View style={cellViewStyle(props = prop, defaultStyle = styles.sudokuCell)}>
+      <View style={cellViewStyle(prop, styles.sudokuCell)}>
         {prop.value.map(potentialRow => PotentialValueRow(potentialRow))}
       </View>
     </TouchableHighlight>
