@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native'
 
+// styles common across all colour modes
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -18,7 +19,7 @@ const styles = StyleSheet.create({
   sudokuCell: {
     height: 39,
     width: 39,
-    paddingRight: 5,
+    padding: 0,
     marginRight: 0,
     marginTop: 0,
     marginLeft: 0,
@@ -46,10 +47,10 @@ const styles = StyleSheet.create({
   potentialText: {
     fontSize: 10,
     textAlign: 'center'//,
-    // color: 'gray'
   },
 })
 
+// "light-mode" styling
 const lightMode = {
   // constant styles
   backgroundColor: '#F7F7F7', // colour of background (colour outside of sudoku board)
@@ -71,6 +72,7 @@ const lightMode = {
   borderColorPotential: "#2D3C2D" // colour of cell border
 }
 
+// "dark-mode" styling
 const darkMode = {
   // constant styles
   backgroundColor: '#000000', // colour of background (colour outside of sudoku board)

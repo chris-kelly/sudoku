@@ -107,7 +107,7 @@ const convert_base_x_to_10 = function(x,old_base) {
 }
 
 /**
- * Convert number from base x to base 10
+ * Convert number from base 10 to base x
  * @param {number} x - Integer to convert
  * @param {number} new_base - New base for integer
  */

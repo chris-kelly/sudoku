@@ -12,8 +12,7 @@ export const checkIndexDivisibleThree = (n) => {
     return n % 3 === 0
 };
 
-export const cellViewStyle = function(props, defaultStyle = {borderWidth: 0.5}) {
-  
+export const cellViewStyle = function( {props, defaultStyle = {borderWidth: 0.5} } ) {
   let borderWidths = {
     // Make the top border of the selected cell very thick (4). Otherwise, make the top border of rows 0,3,6 medium thick (2). Otherwise, thin (0.5).
     borderTopWidth: props.isSelectedCell ? 4 : checkIndexDivisibleThree(props.i) ? 2 : 0.5,
@@ -31,7 +30,7 @@ export const cellViewStyle = function(props, defaultStyle = {borderWidth: 0.5}) 
   return( {...defaultStyle, ...cellColors, ...borderWidths} )
 }
 
-export const cellTextStyle = function(props, defaultStyle = {fontSize: 20}) {
+export const cellTextStyle = function({props, defaultStyle = {fontSize: 20}}) {
   // Text colour depends on if it is user input or pre-filled 
   let textStyle = {color: props.textColor}
   return( {...textStyle, ...defaultStyle} )
