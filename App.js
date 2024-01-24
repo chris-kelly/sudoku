@@ -3,14 +3,16 @@
 import React from 'react'
 import { TouchableOpacity, Text, View, ImageBackground, Alert, Platform } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator, HeaderBackButton} from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
+import { HeaderBackButton } from '@react-navigation/elements'
 import 'react-native-gesture-handler';
 import {matrix} from 'mathjs'
 
 // Specific functions
+import {menuStyles} from './src/styles/Styles.js'
 import {lightMode,darkMode} from './src/styles/Styles.js'
 import {generateNewSudokuFromSeed,sudokuSets,constraints} from './src/utils/generateNewSudoku'
-import {storeData,getData,removeData} from './src/utils/saveProgress'
+import {storeData,getData,deleteData} from './src/utils/saveProgress'
 import {Game} from './Game.js'
 
 const Stack = createStackNavigator();
@@ -95,29 +97,24 @@ export class HomeScreen extends React.Component {
     return (
       <View style = {{flex: 1, justifyContent: "center", alignItems: "center", marginTop: 22}}>
         <ImageBackground
-          style={{height:400, width: 400, alignItems: "center"}}
+          style={menuStyles.background}
           source={require('./src/img/homescreen.jpg')}
           >
           <View style = {{width: 200, paddingLeft: 50, paddingTop: 170}}>
             <TouchableOpacity
-              onPress = {
-                () => {
-                  this.generateGame(false,continueButton)
-                }
-              }
-              style = {{backgroundColor: '#263962', height: 50, width: 150, justifyContent: "center", alignItems: "center"}}
+              onPress = { () => { this.generateGame(false,continueButton) } }
+              style = { menuStyles.buttonFormat }
               >
-              <Text style={{color: '#FFFFFF', fontSize: 20}}>New Game</Text> 
+              <Text style={menuStyles.buttonText}>New Game</Text> 
             </TouchableOpacity>
-            <View style = {{height: 15}}></View>
             <TouchableOpacity
               onPress = {() => {this.generateGame(true)}}
               style = {{
-                backgroundColor: '#263962', height: 50, width: 150, justifyContent: "center", alignItems: "center",
-                display: continueButton === true ? 'flex' : 'none'
+                ...menuStyles.buttonFormat,
+                ...{display: continueButton === true ? 'flex' : 'none'}
               }}
               >
-              <Text style={{color: '#FFFFFF', fontSize: 20}}>Continue Game</Text> 
+              <Text style={menuStyles.buttonText}>Continue Game</Text> 
             </TouchableOpacity>
             {/* <Switch
               trackColor={{ false: "#767577", true: "#81b0ff" }}
@@ -179,31 +176,28 @@ export class NewGameDifficulty extends React.Component {
     return (
       <View style = {{flex: 1, justifyContent: "center", alignItems: "center", marginTop: 22}}>
         <ImageBackground
-          style={{height:400, width: 400, alignItems: "center"}}
+          style={menuStyles.background}
           source={require('./src/img/homescreen.jpg')}
           >
           <View style = {{width: 200, paddingLeft: 50, paddingTop: 170}}>
             <TouchableOpacity
               onPress = {() => {this.generateGame('Easy')}}
-              style = {{backgroundColor: '#263962', height: 50, width: 150, justifyContent: "center", alignItems: "center"}}
+              style = { menuStyles.buttonFormat }
               >
-              <Text style={{color: '#FFFFFF', fontSize: 20}}>Easy</Text> 
+              <Text style={menuStyles.buttonText}>Easy</Text> 
             </TouchableOpacity>
-            <View style = {{height: 15}}></View>
             <TouchableOpacity
               onPress = {() => {this.generateGame('Medium')}}
-              style = {{backgroundColor: '#263962', height: 50, width: 150, justifyContent: "center", alignItems: "center"}}
+              style = { menuStyles.buttonFormat }
               >
-              <Text style={{color: '#FFFFFF', fontSize: 20}}>Medium</Text> 
+              <Text style={menuStyles.buttonText}>Medium</Text> 
             </TouchableOpacity>
-            <View style = {{height: 15}}></View>
             <TouchableOpacity
               onPress = {() => {this.generateGame('Hard')}}
-              style = {{backgroundColor: '#263962', height: 50, width: 150, justifyContent: "center", alignItems: "center"}}
+              style = { menuStyles.buttonFormat }
               >
-              <Text style={{color: '#FFFFFF',  fontSize: 20}}>Hard</Text> 
+              <Text style={menuStyles.buttonText}>Hard</Text> 
             </TouchableOpacity>
-            <View style = {{height: 15}}></View>
           </View>
         </ImageBackground>
       </View>
@@ -219,12 +213,12 @@ export class WinnerScreen extends React.Component {
     if (Platform.OS === 'web') {
       let c = confirm('Well done! Play again?')
       if(c) {
-        removeData().then((value) => { 
+        deleteData().then((value) => { 
           this.props.navigation.navigate('Home',{continueButton: false})
         })
       }
     } else {
-      removeData().then((value) => { 
+      deleteData().then((value) => { 
         this.props.navigation.navigate('Home',{continueButton: false})
       }) 
     }
@@ -235,7 +229,7 @@ export class WinnerScreen extends React.Component {
     return (
       <View style = {{flex: 1, justifyContent: "center", alignItems: "center", marginTop: 22}}>
         <ImageBackground
-          style={{height:400, width: 400, alignItems: "center"}}
+          style={menuStyles.background}
           source={require('./src/img/winner.jpg')}
           >
           <View style = {{width: 450, paddingLeft: 0, paddingTop: 300, alignItems: "center"}}>
@@ -244,9 +238,9 @@ export class WinnerScreen extends React.Component {
             <Text>Total cells filled by CPU: {solveCounter}</Text>
             <View style = {{width: 150, paddingTop: 20}}>
               <TouchableOpacity onPress = {() => {this.continue()}}
-                  style = {{backgroundColor: '#263962', height: 50, width: 150, justifyContent: "center", alignItems: "center"}}
+                  style = { menuStyles.buttonFormat }
                 >
-                  <Text style={{color: '#FFFFFF', fontSize: 20}}>Continue</Text> 
+                  <Text style={menuStyles.buttonText}>Continue</Text> 
                   </TouchableOpacity>
             </View>
           </View>
@@ -294,6 +288,15 @@ export class MyStack extends React.Component {
               })
             } 
             />
+          {/* <Stack.Screen 
+            name="Settings"
+            component={SettingScreen} 
+            options={{
+              cardStyle: {
+                backgroundColor: '#F7F7F7'
+              }
+            }}
+            /> */}
           <Stack.Screen 
             name="Winner"
             component={WinnerScreen}
