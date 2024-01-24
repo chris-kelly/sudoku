@@ -1,15 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const STORAGE_KEY = '@save_game'
-
 /**
  * Save sudoku progress 
  * @param {*} value - Store Sudoku progress
  */
-const storeData = async (value) => {
+const storeData = async (value, location = '@save_game') => {
   try {
     const jsonValue = JSON.stringify(value)
-    await AsyncStorage.setItem(STORAGE_KEY, jsonValue)
+    await AsyncStorage.setItem(location, jsonValue)
     console.log('Successful save of data')
   } catch (e) { // saving error
     console.log('There has been an error saving data!')
@@ -19,9 +17,9 @@ const storeData = async (value) => {
 /**
  * Retrieve sudoku progress
  */
-const getData = async () => {
+const getData = async (location = '@save_game') => {
   try {
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY)
+    const jsonValue = await AsyncStorage.getItem(location)
     console.log('Successful read of data')
     return jsonValue != null ? JSON.parse(jsonValue) : null;
   } catch(e) { // error reading value
@@ -32,9 +30,9 @@ const getData = async () => {
 /**
  * Remove sudoku progress
  */
-const removeData = async () => {
+const deleteData = async (location = '@save_game') => {
   try {
-      await AsyncStorage.removeItem(STORAGE_KEY);
+      await AsyncStorage.removeItem(location);
       console.log('Successful deletion of old data')
   } catch(e) {
     console.log('There has been an error deleting saved data!')
@@ -42,8 +40,7 @@ const removeData = async () => {
 }
 
 export {
-  STORAGE_KEY as STORAGE_KEY,
   storeData as storeData,
   getData as getData,
-  removeData as removeData,
+  deleteData as deleteData,
 }
