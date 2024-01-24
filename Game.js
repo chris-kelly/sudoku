@@ -30,7 +30,7 @@ const NormalCell = (props) => {
   return (
     <TouchableHighlight onPress={prop.onClick}>
       <View style={ cellViewStyle( {props: prop, defaultStyle: styles.sudokuCell }) }>
-        <Text style={cellTextStyle( {props: prop, defaultStyle: styles.defaultText} )}> 
+        <Text style={cellTextStyle( {props: prop, defaultStyle: styles.normalText} )}> 
           {numberValueRender(prop.value)}
         </Text>
       </View>
@@ -65,7 +65,7 @@ const PotentialCell = (props) => {
    **/
   let PotentialValueRow = function(potentialRow) {
     return (
-      <View style={[styles.sudokuRow, {borderColor: prop.borderColor}]}>
+      <View style={styles.sudokuRow}>
         {potentialRow.map(potentialCol => PotentialValue(potentialCol))}
       </View>
     )
