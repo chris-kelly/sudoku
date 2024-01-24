@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native'
 
 // styles common across all colour modes
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: {
     flex: 1,
     // backgroundColor: '#F7F7F7', // '#362819', //
@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     margin: 20,
   },
-  defaultText: {
+  normalText: {
     fontSize: 20,
     textAlign: 'center',
     fontWeight: 'bold',
@@ -50,8 +50,29 @@ const styles = StyleSheet.create({
   },
 })
 
+// menu styles
+export const menuStyles = StyleSheet.create({
+  buttonFormat: {
+    backgroundColor: '#263962',
+    height: 50, 
+    width: 150, 
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15
+  },
+  buttonText: {
+    color: '#FFFFFF', 
+    fontSize: 20,
+  },
+  background: {
+    height:400, 
+    width: 400, 
+    alignItems: "center",
+  }
+})
+
 // "light-mode" styling
-const lightMode = {
+export const lightMode = {
   // constant styles
   backgroundColor: '#F7F7F7', // colour of background (colour outside of sudoku board)
   cellBackground: '#FFFFFF', // non-selected cell background
@@ -73,7 +94,7 @@ const lightMode = {
 }
 
 // "dark-mode" styling
-const darkMode = {
+export const darkMode = {
   // constant styles
   backgroundColor: '#000000', // colour of background (colour outside of sudoku board)
   cellBackground: '#221A10', // non-selected cell background
@@ -92,10 +113,4 @@ const darkMode = {
   preFilledTextPotential: "#59B459", // pre-filled text colour
   userFilledTextPotential: "#91EA91", // user-filled text colour
   borderColorPotential: "#61CE61" // colour of cell border
-}
-
-export {
-    styles as styles,
-    lightMode as lightMode,
-    darkMode as darkMode, 
 }
